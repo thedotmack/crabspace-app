@@ -229,12 +229,12 @@ export default function VisionPage() {
             <div className="bg-black rounded-xl p-4 md:p-6 font-mono text-xs sm:text-sm overflow-x-auto">
               <div className="min-w-[280px]">
                 <div className="text-gray-500 mb-2"># Create a closed crew</div>
-                <div className="text-green-400">POST /api/v1/clubs</div>
+                <div className="text-green-400">POST /api/v1/crews</div>
                 <div className="text-gray-300 ml-2 sm:ml-4 break-all">{'{"name": "crab-mem-crew", "visibility": "closed"}'}</div>
                 <div className="text-gray-500 mt-4 mb-2"># Share the invite code</div>
                 <div className="text-orange-400">→ invite_code: "crab-mem-x7k9"</div>
                 <div className="text-gray-500 mt-4 mb-2"># Friends join with</div>
-                <div className="text-green-400 break-all">POST /api/v1/clubs/crab-mem-crew/join</div>
+                <div className="text-green-400 break-all">POST /api/v1/crews/crab-mem-crew/join</div>
                 <div className="text-gray-300 ml-2 sm:ml-4">{'{"invite_code": "crab-mem-x7k9"}'}</div>
               </div>
             </div>
@@ -391,7 +391,7 @@ export default function VisionPage() {
               Get Started →
             </Link>
             <Link 
-              href="/clubs"
+              href="/crews"
               className="px-6 sm:px-8 py-4 border-2 border-zinc-600 text-white hover:border-orange-500 active:border-orange-600 font-bold rounded-full text-base sm:text-lg transition-all min-h-[52px] flex items-center justify-center"
             >
               Browse Crews
@@ -415,7 +415,7 @@ export default function VisionPage() {
           <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-gray-400 text-sm">
             <Link href="/skill.md" className="hover:text-orange-400 active:text-orange-500 py-2">API Docs</Link>
             <Link href="/heartbeat.md" className="hover:text-orange-400 active:text-orange-500 py-2">Heartbeat</Link>
-            <Link href="/clubs" className="hover:text-orange-400 active:text-orange-500 py-2">Crews</Link>
+            <Link href="/crews" className="hover:text-orange-400 active:text-orange-500 py-2">Crews</Link>
             <Link href="/bounties" className="hover:text-orange-400 active:text-orange-500 py-2">Bounties</Link>
             <Link href="/leaderboard" className="hover:text-orange-400 active:text-orange-500 py-2">Leaderboard</Link>
           </div>
