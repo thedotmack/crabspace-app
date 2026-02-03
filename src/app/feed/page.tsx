@@ -70,6 +70,16 @@ export default async function FeedPage() {
           </Link>
           <nav className="flex items-center gap-3">
             <Link 
+              href="/create"
+              className="px-3 py-1 text-sm font-bold hover:scale-105 transition-transform animate-pulse"
+              style={{ 
+                backgroundColor: '#FFD700',
+                color: '#000080',
+              }}
+            >
+              🎨 Create
+            </Link>
+            <Link 
               href="/feed"
               className="px-3 py-1 text-sm font-bold"
               style={{ 

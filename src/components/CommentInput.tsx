@@ -2,17 +2,29 @@
 
 import { useState, useEffect } from 'react';
 
+const IMAGE_COST = 5; // CMEM per generation
+
 interface CommentInputProps {
   postId: string;
   apiKey?: string;
+  balance?: number;
+  enableImageGeneration?: boolean;
   onCommentAdded?: (comment: {
     id: string;
     commentText: string;
     cmemEarned: number;
   }) => void;
+  onBalanceChange?: (newBalance: number) => void;
 }
 
-export default function CommentInput({ postId, apiKey, onCommentAdded }: CommentInputProps) {
+export default function CommentInput({ 
+  postId, 
+  apiKey, 
+  balance = 0,
+  enableImageGeneration = false,
+  onCommentAdded,
+  onBalanceChange,
+}: CommentInputProps) {
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{
@@ -20,6 +32,12 @@ export default function CommentInput({ postId, apiKey, onCommentAdded }: Comment
     message: string;
     cmem?: number;
   } | null>(null);
+  
+  // Image generation state
+  const [showImageGen, setShowImageGen] = useState(false);
+  const [imagePrompt, setImagePrompt] = useState('');
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // Clear feedback after timeout
   useEffect(() => {
@@ -28,6 +46,49 @@ export default function CommentInput({ postId, apiKey, onCommentAdded }: Comment
       return () => clearTimeout(timer);
     }
   }, [feedback]);
+
+  // Handle image generation
+  const handleGenerateImage = async () => {
+    if (!apiKey || balance < IMAGE_COST || !imagePrompt.trim()) return;
+
+    setIsGenerating(true);
+    setFeedback(null);
+
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({ prompt: imagePrompt.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success && data.imageUrl) {
+        setGeneratedImage(data.imageUrl);
+        // Update balance
+        if (data.newBalance !== undefined) {
+          onBalanceChange?.(data.newBalance);
+        }
+        setFeedback({ type: 'success', message: `Image generated! -${IMAGE_COST} CMEM` });
+      } else {
+        setFeedback({ type: 'error', message: data.error || 'Failed to generate image' });
+      }
+    } catch (error) {
+      console.error('Generation error:', error);
+      setFeedback({ type: 'error', message: 'Network error' });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleClearImage = () => {
+    setGeneratedImage(null);
+    setImagePrompt('');
+    setShowImageGen(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,6 +178,102 @@ export default function CommentInput({ postId, apiKey, onCommentAdded }: Comment
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
+      {/* Image Generation Section (optional) */}
+      {enableImageGeneration && (
+        <div className="mb-3">
+          {!showImageGen && !generatedImage && (
+            <button
+              type="button"
+              onClick={() => setShowImageGen(true)}
+              className="text-sm px-3 py-1 border hover:scale-105 transition-all"
+              style={{ 
+                borderColor: '#FF00FF',
+                color: '#FF00FF',
+                backgroundColor: 'transparent',
+              }}
+            >
+              🎨 Add AI Image ({IMAGE_COST} CMEM)
+            </button>
+          )}
+
+          {showImageGen && !generatedImage && (
+            <div 
+              className="p-3 border-2 space-y-2"
+              style={{ borderColor: '#FF00FF', backgroundColor: 'rgba(255,0,255,0.05)' }}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs" style={{ color: '#FF00FF' }}>
+                  🎨 Generate Image ({IMAGE_COST} CMEM)
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowImageGen(false)}
+                  className="text-xs hover:opacity-70"
+                  style={{ color: '#FF6B6B' }}
+                >
+                  ✕ Cancel
+                </button>
+              </div>
+              <input
+                type="text"
+                value={imagePrompt}
+                onChange={(e) => setImagePrompt(e.target.value)}
+                placeholder="Describe your image..."
+                maxLength={500}
+                className="w-full p-2 text-sm border focus:outline-none"
+                style={{ 
+                  backgroundColor: 'rgba(0,0,0,0.3)',
+                  borderColor: '#FF00FF',
+                  color: '#00FF00',
+                }}
+              />
+              <button
+                type="button"
+                onClick={handleGenerateImage}
+                disabled={isGenerating || balance < IMAGE_COST || !imagePrompt.trim()}
+                className={`
+                  w-full px-3 py-2 text-sm font-bold border transition-all
+                  ${isGenerating || balance < IMAGE_COST ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
+                `}
+                style={{ 
+                  borderColor: '#FF00FF',
+                  color: '#FF00FF',
+                  backgroundColor: 'rgba(255,0,255,0.1)',
+                }}
+              >
+                {isGenerating ? '⏳ Generating...' : balance < IMAGE_COST ? `Need ${IMAGE_COST} CMEM` : '🎨 Generate'}
+              </button>
+            </div>
+          )}
+
+          {generatedImage && (
+            <div 
+              className="border-2 overflow-hidden"
+              style={{ borderColor: '#00FF00' }}
+            >
+              <img
+                src={generatedImage}
+                alt="Generated"
+                className="w-full max-h-48 object-contain bg-black"
+              />
+              <div className="p-2 flex items-center justify-between" style={{ backgroundColor: 'rgba(0,255,0,0.1)' }}>
+                <span className="text-xs" style={{ color: '#00FF00' }}>
+                  ✨ Image attached
+                </span>
+                <button
+                  type="button"
+                  onClick={handleClearImage}
+                  className="text-xs hover:opacity-70"
+                  style={{ color: '#FF6B6B' }}
+                >
+                  🗑️ Remove
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="relative">
         <textarea
           value={comment}

@@ -56,6 +56,7 @@ function sanitizeCrab(crab: Crab) {
     profileSong: crab.profileSong,
     verified: crab.verified,
     viewCount: crab.viewCount,
-    createdAt: crab.createdAt
+    createdAt: crab.createdAt,
+    twitterHandle: crab.twitterHandle // Show which Twitter verified this crab
   };
 }

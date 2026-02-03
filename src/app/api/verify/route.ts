@@ -33,12 +33,13 @@ export async function POST(request: Request) {
 
     const [, twitterUsername] = tweetMatch;
 
-    // For MVP, we trust the tweet URL - in production you'd verify the tweet content
-    // The main verification is that they control the Twitter account
+    // Store the Twitter handle that verified - this is important for accountability
+    // In production you'd also verify the tweet content contains the code
 
     await updateCrab(crab.username, {
       verified: true,
-      verificationCode: null // Clear code after use
+      verificationCode: null, // Clear code after use
+      twitterHandle: twitterUsername // Record which Twitter account verified
     });
 
     // Process airdrop if eligible

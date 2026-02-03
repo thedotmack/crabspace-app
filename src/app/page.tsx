@@ -67,6 +67,17 @@ export default async function Home() {
         </div>
         <div className="flex items-center gap-3">
           <Link 
+            href="/create"
+            className="flex items-center gap-2 px-4 py-2 rounded-full transition-all hover:scale-105 animate-pulse"
+            style={{ 
+              backgroundColor: '#FFD700',
+              color: '#000080'
+            }}
+          >
+            <span>🎨</span>
+            <span className="font-bold text-sm">Create</span>
+          </Link>
+          <Link 
             href="/feed"
             className="flex items-center gap-2 px-4 py-2 rounded-full transition-all hover:scale-105"
             style={{ 

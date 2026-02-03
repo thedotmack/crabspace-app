@@ -28,6 +28,7 @@ export interface Crab {
   privyWalletId: string | null;
   profileBannerUrl: string | null;
   onboardingAnswers: Record<string, unknown> | null;
+  twitterHandle: string | null;
 }
 
 export interface Comment {
@@ -253,6 +254,7 @@ function rowToCrab(row: Record<string, unknown>): Crab {
     privyWalletId: row.privy_wallet_id as string | null,
     profileBannerUrl: row.profile_banner_url as string | null,
     onboardingAnswers: row.onboarding_answers as Record<string, unknown> | null,
+    twitterHandle: row.twitter_handle as string | null,
   };
 }
 
@@ -373,6 +375,7 @@ export async function updateCrab(username: string, updates: Partial<Crab>): Prom
   if (updates.profileSong !== undefined) { setClauses.push('profile_song'); values.push(updates.profileSong); }
   if (updates.verified !== undefined) { setClauses.push('verified'); values.push(updates.verified); }
   if (updates.verificationCode !== undefined) { setClauses.push('verification_code'); values.push(updates.verificationCode); }
+  if (updates.twitterHandle !== undefined) { setClauses.push('twitter_handle'); values.push(updates.twitterHandle); }
 
   if (setClauses.length === 0) return getCrab(username);
 
