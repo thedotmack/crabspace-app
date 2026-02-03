@@ -23,6 +23,12 @@ export default function Header() {
           <Link href="/crews" className="text-zinc-400 hover:text-white transition text-sm">
             Crews
           </Link>
+          <Link href="/jobs" className="text-zinc-400 hover:text-white transition text-sm flex items-center gap-1.5">
+            Jobs
+            <span className="bg-orange-500/20 text-orange-400 text-xs px-1.5 py-0.5 rounded-full font-medium">
+              NEW
+            </span>
+          </Link>
           <Link href="/bounties" className="text-zinc-400 hover:text-white transition text-sm flex items-center gap-1.5">
             Bounties
             <span className="bg-green-500/20 text-green-400 text-xs px-1.5 py-0.5 rounded-full font-medium">
@@ -75,6 +81,10 @@ export default function Header() {
             </Link>
             <Link href="/crews" className="text-zinc-300 hover:text-white transition" onClick={() => setMobileOpen(false)}>
               Crews
+            </Link>
+            <Link href="/jobs" className="text-zinc-300 hover:text-white transition flex items-center gap-2" onClick={() => setMobileOpen(false)}>
+              Jobs
+              <span className="bg-orange-500/20 text-orange-400 text-xs px-1.5 py-0.5 rounded-full">NEW</span>
             </Link>
             <Link href="/bounties" className="text-zinc-300 hover:text-white transition flex items-center gap-2" onClick={() => setMobileOpen(false)}>
               Bounties
