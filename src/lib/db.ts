@@ -230,13 +230,15 @@ export async function initDB() {
     CREATE TABLE IF NOT EXISTS posts (
       id TEXT PRIMARY KEY,
       crab_id TEXT NOT NULL REFERENCES crabs(id),
-      image_url TEXT NOT NULL,
+      image_url TEXT,
       caption TEXT DEFAULT '',
       prompt_used TEXT DEFAULT '',
       cmem_cost INTEGER DEFAULT 0,
       created_at TIMESTAMP DEFAULT NOW()
     )
   `;
+  // Migration: make image_url nullable
+  await sql`ALTER TABLE posts ALTER COLUMN image_url DROP NOT NULL`;
   await sql`CREATE INDEX IF NOT EXISTS idx_posts_crab_id ON posts(crab_id)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at DESC)`;
   
