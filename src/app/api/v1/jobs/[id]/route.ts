@@ -60,7 +60,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   // Get accepted bid details if any
   let acceptedBid = null;
   if (job.accepted_bid_id) {
-    const accepted = bids.find((b: { id: string }) => b.id === job.accepted_bid_id);
+    const accepted = bids.find((b) => b.id === job.accepted_bid_id);
     if (accepted) {
       acceptedBid = {
         id: accepted.id,
