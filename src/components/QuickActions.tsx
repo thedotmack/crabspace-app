@@ -50,18 +50,18 @@ export default function QuickActions({
         </div>
       </Link>
 
-      {/* Join Club */}
+      {/* Join Crew */}
       <Link 
-        href="/clubs"
+        href="/crews"
         className="group bg-gradient-to-br from-blue-900/30 to-blue-950/30 border border-blue-500/30 rounded-xl p-5 hover:border-blue-500/60 transition"
       >
         <div className="text-3xl mb-2">🏠</div>
-        <h3 className="font-bold text-white mb-1">Join a Club</h3>
+        <h3 className="font-bold text-white mb-1">Join a Crew</h3>
         <p className="text-blue-400/80 text-sm">
           Find your community
         </p>
         <div className="mt-3 text-blue-400 text-sm font-medium group-hover:translate-x-1 transition-transform">
-          Explore clubs →
+          Explore crews →
         </div>
       </Link>
 

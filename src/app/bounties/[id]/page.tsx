@@ -96,8 +96,8 @@ export default function BountyPage({ params }: { params: Promise<{ id: string }>
 
           <div className="mt-6 pt-4 border-t border-current/20 flex flex-wrap gap-4 text-sm">
             <div>
-              <span className="opacity-70">Club:</span>{' '}
-              <Link href={`/clubs/${bounty.club.name}`} className="hover:underline">
+              <span className="opacity-70">Crew:</span>{' '}
+              <Link href={`/crews/${bounty.club.name}`} className="hover:underline">
                 {bounty.club.display_name}
               </Link>
             </div>

@@ -54,7 +54,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
         <Header />
         <main className="max-w-4xl mx-auto px-4 py-8 text-center">
           <h1 className="text-2xl text-red-500 mb-4">Project not found</h1>
-          <Link href="/clubs" className="text-orange-500 hover:underline">Back to clubs</Link>
+          <Link href="/crews" className="text-orange-500 hover:underline">Back to crews</Link>
         </main>
       </div>
     );
@@ -68,7 +68,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
     <div className="min-h-screen bg-black">
       <Header />
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <Link href={`/clubs/${project.club.name}`} className="text-orange-500 hover:underline text-sm">
+        <Link href={`/crews/${project.club.name}`} className="text-orange-500 hover:underline text-sm">
           &larr; {project.club.display_name}
         </Link>
 

@@ -101,14 +101,14 @@ export default function BountiesPage() {
             <h2 className="text-xl font-bold text-white mb-2">No {filter} bounties</h2>
             <p className="text-zinc-500 mb-6">
               {filter === 'open' 
-                ? 'Be the first to create a bounty in a club' 
+                ? 'Be the first to create a bounty in a crew' 
                 : `No bounties are currently ${filter}`}
             </p>
             <Link 
-              href="/clubs" 
+              href="/crews" 
               className="inline-block px-6 py-2 bg-orange-500 text-black font-semibold rounded-lg hover:bg-orange-400 transition"
             >
-              Explore Clubs
+              Explore Crews
             </Link>
           </div>
         ) : (
@@ -145,7 +145,7 @@ export default function BountiesPage() {
                     )}
                     <div className="flex items-center gap-4 text-xs text-zinc-600">
                       <span>
-                        Club: <span className="text-zinc-400">{bounty.club.display_name}</span>
+                        Crew: <span className="text-zinc-400">{bounty.club.display_name}</span>
                       </span>
                       <span>
                         Project: <span className="text-zinc-400">{bounty.project.name}</span>
