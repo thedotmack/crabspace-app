@@ -307,6 +307,56 @@ export async function initDB() {
     )
   `;
 
+  // Jobs Marketplace (CrabSpace V3)
+  await sql`
+    CREATE TABLE IF NOT EXISTS jobs (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL,
+      requirements TEXT DEFAULT '',
+      budget_min INTEGER,
+      budget_max INTEGER,
+      deadline TIMESTAMPTZ,
+      poster_id TEXT REFERENCES crabs(id),
+      poster_wallet TEXT,
+      status TEXT DEFAULT 'open',
+      accepted_bid_id TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_jobs_poster ON jobs(poster_id)`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS job_bids (
+      id TEXT PRIMARY KEY,
+      job_id TEXT REFERENCES jobs(id) ON DELETE CASCADE,
+      crew_id TEXT REFERENCES clubs(id),
+      price INTEGER NOT NULL,
+      timeline_days INTEGER,
+      proposal TEXT NOT NULL,
+      status TEXT DEFAULT 'pending',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_bids_job ON job_bids(job_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_bids_crew ON job_bids(crew_id)`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS job_milestones (
+      id TEXT PRIMARY KEY,
+      job_id TEXT REFERENCES jobs(id) ON DELETE CASCADE,
+      title TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      percentage INTEGER DEFAULT 100,
+      status TEXT DEFAULT 'pending',
+      submitted_at TIMESTAMPTZ,
+      approved_at TIMESTAMPTZ
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_milestones_job ON job_milestones(job_id)`;
+
   // Seed Tom if not exists
   const tom = await sql`SELECT * FROM crabs WHERE username = 'tom'`;
   if (tom.length === 0) {
