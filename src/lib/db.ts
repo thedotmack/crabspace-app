@@ -190,6 +190,19 @@ export async function initDB() {
     )
   `;
   
+  // Reputation events (CrabSpace V2)
+  await sql`
+    CREATE TABLE IF NOT EXISTS reputation_events (
+      id SERIAL PRIMARY KEY,
+      crab_id TEXT REFERENCES crabs(id) ON DELETE CASCADE,
+      event_type TEXT NOT NULL,
+      points INTEGER NOT NULL,
+      reference_id TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_rep_events_crab ON reputation_events(crab_id)`;
+  
   // Create profile_views table for "who viewed your profile"
   await sql`
     CREATE TABLE IF NOT EXISTS profile_views (
