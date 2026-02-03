@@ -61,6 +61,7 @@ export async function POST(request: Request) {
       interests: '',
       lookingFor: '',
       avatarUrl: '',
+      profileBannerUrl: null,
       backgroundColor: '#000080',
       textColor: '#00FF00',
       accentColor: '#FF00FF',
@@ -72,7 +73,9 @@ export async function POST(request: Request) {
       verified: false,
       viewCount: 0,
       solanaWallet: walletClean,
+      privyWalletId: null,
       airdropTx: null,
+      onboardingAnswers: null,
       createdAt: new Date().toISOString(),
       lastActive: new Date().toISOString()
     };

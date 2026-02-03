@@ -25,6 +25,9 @@ export interface Crab {
   airdropTx: string | null;
   createdAt: string;
   lastActive: string | null;
+  privyWalletId: string | null;
+  profileBannerUrl: string | null;
+  onboardingAnswers: Record<string, unknown> | null;
 }
 
 export interface Comment {
@@ -33,6 +36,43 @@ export interface Comment {
   authorUsername: string;
   content: string;
   createdAt: string;
+}
+
+// Instagram pivot interfaces
+export interface Post {
+  id: string;
+  crabId: string;
+  imageUrl: string;
+  caption: string;
+  promptUsed: string;
+  cmemCost: number;
+  createdAt: string;
+}
+
+export interface Engagement {
+  id: string;
+  postId: string;
+  crabId: string;
+  type: 'like' | 'comment' | 'share';
+  commentText: string;
+  commentImageUrl: string;
+  cmemEarned: number;
+  createdAt: string;
+}
+
+export interface DailyInteraction {
+  id: number;
+  fromCrabId: string;
+  toCrabId: string;
+  interactionDate: string;
+  cmemEarned: number;
+}
+
+export interface BoostSettings {
+  crabId: string;
+  boostAmount: number;
+  enabled: boolean;
+  updatedAt: string;
 }
 
 // Initialize tables (run once)
@@ -70,6 +110,11 @@ export async function initDB() {
   // Add last_active for online status (migration)
   await sql`ALTER TABLE crabs ADD COLUMN IF NOT EXISTS last_active TIMESTAMP DEFAULT NOW()`;
   
+  // Add Instagram pivot columns (migration)
+  await sql`ALTER TABLE crabs ADD COLUMN IF NOT EXISTS privy_wallet_id TEXT`;
+  await sql`ALTER TABLE crabs ADD COLUMN IF NOT EXISTS profile_banner_url TEXT`;
+  await sql`ALTER TABLE crabs ADD COLUMN IF NOT EXISTS onboarding_answers JSONB`;
+  
   // Create profile_views table for "who viewed your profile"
   await sql`
     CREATE TABLE IF NOT EXISTS profile_views (
@@ -78,6 +123,58 @@ export async function initDB() {
       viewer_username TEXT,
       viewer_ip TEXT,
       viewed_at TIMESTAMP DEFAULT NOW()
+    )
+  `;
+
+  // Instagram pivot tables
+  await sql`
+    CREATE TABLE IF NOT EXISTS posts (
+      id TEXT PRIMARY KEY,
+      crab_id TEXT NOT NULL REFERENCES crabs(id),
+      image_url TEXT NOT NULL,
+      caption TEXT DEFAULT '',
+      prompt_used TEXT DEFAULT '',
+      cmem_cost INTEGER DEFAULT 0,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_posts_crab_id ON posts(crab_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at DESC)`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS engagements (
+      id TEXT PRIMARY KEY,
+      post_id TEXT NOT NULL REFERENCES posts(id),
+      crab_id TEXT NOT NULL REFERENCES crabs(id),
+      type TEXT NOT NULL,
+      comment_text TEXT DEFAULT '',
+      comment_image_url TEXT DEFAULT '',
+      cmem_earned INTEGER DEFAULT 0,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_engagements_post_id ON engagements(post_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_engagements_crab_id ON engagements(crab_id)`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS daily_interactions (
+      id SERIAL PRIMARY KEY,
+      from_crab_id TEXT NOT NULL REFERENCES crabs(id),
+      to_crab_id TEXT NOT NULL REFERENCES crabs(id),
+      interaction_date DATE NOT NULL DEFAULT CURRENT_DATE,
+      cmem_earned INTEGER DEFAULT 0,
+      UNIQUE(from_crab_id, to_crab_id, interaction_date)
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_daily_interactions_from ON daily_interactions(from_crab_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_daily_interactions_date ON daily_interactions(interaction_date)`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS boost_settings (
+      crab_id TEXT PRIMARY KEY REFERENCES crabs(id),
+      boost_amount INTEGER DEFAULT 0,
+      enabled BOOLEAN DEFAULT FALSE,
+      updated_at TIMESTAMP DEFAULT NOW()
     )
   `;
 
@@ -153,6 +250,9 @@ function rowToCrab(row: Record<string, unknown>): Crab {
     airdropTx: row.airdrop_tx as string | null,
     createdAt: row.created_at as string,
     lastActive: row.last_active as string | null,
+    privyWalletId: row.privy_wallet_id as string | null,
+    profileBannerUrl: row.profile_banner_url as string | null,
+    onboardingAnswers: row.onboarding_answers as Record<string, unknown> | null,
   };
 }
 
