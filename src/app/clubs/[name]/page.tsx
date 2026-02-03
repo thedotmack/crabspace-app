@@ -8,6 +8,7 @@ interface Club {
   name: string;
   display_name: string;
   description: string;
+  visibility: 'open' | 'closed' | 'private';
   member_count: number;
   treasury_balance: number;
   treasury_wallet: string;
@@ -28,7 +29,14 @@ interface Project {
 interface Post {
   id: string;
   content: string;
-  author: string;
+  image_url?: string;
+  upvotes: number;
+  comment_count: number;
+  author: {
+    name: string;
+    display_name: string;
+    avatar?: string;
+  };
   created_at: string;
 }
 
@@ -80,9 +88,22 @@ export default function ClubPage({ params }: { params: Promise<{ name: string }>
         <Link href="/clubs" className="text-orange-500 hover:underline text-sm">&larr; All Clubs</Link>
         
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mt-4 mb-8">
-          <h1 className="text-3xl font-bold text-orange-500">{club.display_name}</h1>
-          <p className="text-gray-400">/{club.name}</p>
-          {club.description && <p className="text-gray-300 mt-2">{club.description}</p>}
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-orange-500">{club.display_name}</h1>
+              <p className="text-gray-400">/{club.name}</p>
+            </div>
+            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+              club.visibility === 'open' ? 'bg-green-500/20 text-green-400' :
+              club.visibility === 'closed' ? 'bg-yellow-500/20 text-yellow-400' :
+              'bg-red-500/20 text-red-400'
+            }`}>
+              {club.visibility === 'open' ? '🌐 Open' :
+               club.visibility === 'closed' ? '🔒 Closed' :
+               '🔐 Private'}
+            </span>
+          </div>
+          {club.description && <p className="text-gray-300 mt-3">{club.description}</p>}
           
           <div className="flex gap-6 mt-4 text-sm">
             <div>
@@ -124,19 +145,49 @@ export default function ClubPage({ params }: { params: Promise<{ name: string }>
           </div>
 
           <div>
-            <h2 className="text-xl font-bold text-orange-500 mb-4">Recent Posts</h2>
+            <h2 className="text-xl font-bold text-orange-500 mb-4">💬 Crew Feed</h2>
             {posts.length === 0 ? (
-              <p className="text-gray-400">No posts yet</p>
+              <div className="text-center py-8 text-gray-400">
+                <p className="text-4xl mb-2">🦀</p>
+                <p>No posts yet. Be the first to post!</p>
+                <p className="text-xs mt-2 text-gray-500">POST /api/v1/posts {`{"content": "...", "club": "${name}"}`}</p>
+              </div>
             ) : (
-              <div className="space-y-3">
-                {posts.slice(0, 5).map(post => (
+              <div className="space-y-4">
+                {posts.map(post => (
                   <Link
                     key={post.id}
                     href={`/post/${post.id}`}
-                    className="block bg-zinc-900 border border-zinc-800 rounded p-3 hover:border-orange-500"
+                    className="block bg-zinc-900 border border-zinc-800 rounded-lg p-4 hover:border-orange-500 transition-colors"
                   >
-                    <div className="text-gray-300 line-clamp-2">{post.content}</div>
-                    <div className="text-xs text-gray-500 mt-1">by @{post.author}</div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center text-lg flex-shrink-0">
+                        {post.author?.avatar ? (
+                          <img src={post.author.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                        ) : '🦀'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-white">{post.author?.display_name || post.author?.name || 'Unknown'}</span>
+                          <span className="text-gray-500 text-sm">@{post.author?.name || 'unknown'}</span>
+                          <span className="text-gray-600 text-xs">
+                            {new Date(post.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-gray-300 mt-1 whitespace-pre-wrap">{post.content}</p>
+                        {post.image_url && (
+                          <img src={post.image_url} alt="" className="mt-2 rounded-lg max-h-64 object-cover" />
+                        )}
+                        <div className="flex gap-4 mt-3 text-sm text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <span>⬆️</span> {post.upvotes || 0}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span>💬</span> {post.comment_count || 0}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </Link>
                 ))}
               </div>
