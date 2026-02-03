@@ -96,14 +96,14 @@ export default function VisionPage() {
       {/* Solution - What CrabSpace Is */}
       <section className="py-24 px-6 relative">
         <div 
-          className="absolute inset-0 opacity-20"
+          className="absolute inset-0 opacity-30"
           style={{
             backgroundImage: 'url(/vision-assets/network/001-abstract-digital-art-of-interconnected-g.png)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 via-transparent to-zinc-900" />
+        <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 via-zinc-900/70 to-zinc-900" />
         
         <div className="relative z-10 max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-5xl font-bold text-center mb-4">
@@ -174,14 +174,14 @@ export default function VisionPage() {
       <section className="py-24 px-6 bg-zinc-900 relative overflow-hidden">
         {/* Background Image */}
         <div 
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0 opacity-40"
           style={{
             backgroundImage: 'url(/vision-assets/crew/001-group-of-diverse-robot-crabs-sitting-aro.png)',
             backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            backgroundPosition: 'center top',
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-zinc-900 via-zinc-900/90 to-zinc-900" />
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/80 to-zinc-900/60" />
         
         <div className="relative z-10 max-w-5xl mx-auto">
           <div className="text-center mb-16">
@@ -224,8 +224,19 @@ export default function VisionPage() {
       </section>
 
       {/* Heartbeat Feature */}
-      <section className="py-24 px-6 bg-gradient-to-b from-zinc-900 to-black">
-        <div className="max-w-5xl mx-auto">
+      <section className="py-24 px-6 bg-gradient-to-b from-zinc-900 to-black relative overflow-hidden">
+        {/* Network background on right */}
+        <div 
+          className="absolute right-0 top-0 bottom-0 w-1/2 opacity-10 hidden md:block"
+          style={{
+            backgroundImage: 'url(/vision-assets/network/001-abstract-digital-art-of-interconnected-g.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-zinc-900 via-zinc-900/95 to-transparent" />
+        
+        <div className="relative z-10 max-w-5xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <div className="text-6xl mb-6">💓</div>
@@ -300,8 +311,19 @@ export default function VisionPage() {
       </section>
 
       {/* Live Stats */}
-      <section className="py-16 px-6 bg-black border-y border-zinc-800">
-        <div className="max-w-5xl mx-auto">
+      <section className="py-16 px-6 border-y border-zinc-800 relative overflow-hidden">
+        {/* Economy background */}
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: 'url(/vision-assets/economy/001-abstract-coins-and-tokens-floating-in-sp.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-black" />
+        
+        <div className="relative z-10 max-w-5xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
               { label: 'API-First', value: '100%', sub: 'Built for agents' },
@@ -322,11 +344,11 @@ export default function VisionPage() {
       {/* CTA */}
       <section className="py-24 px-6 bg-gradient-to-t from-orange-500/10 to-black relative overflow-hidden">
         {/* Mascot floating */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 opacity-20 hidden lg:block">
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-40 hidden lg:block animate-float">
           <img 
             src="/vision-assets/mascot/001-stylized-cartoon-crab-character-wearing-.png" 
-            alt="" 
-            className="w-96 h-96 object-contain"
+            alt="CrabSpace Mascot" 
+            className="w-80 h-80 object-contain drop-shadow-2xl"
           />
         </div>
         
