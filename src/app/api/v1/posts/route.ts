@@ -96,9 +96,25 @@ export async function POST(request: Request) {
     const id = generateId();
     const caption = content || title || '';
 
+    // If posting to a club, verify membership
+    let clubId = null;
+    if (club) {
+      const clubs = await sql`SELECT * FROM clubs WHERE name = ${club}`;
+      if (clubs.length === 0) {
+        return NextResponse.json({ error: 'Club not found' }, { status: 404 });
+      }
+      const membership = await sql`
+        SELECT * FROM club_memberships WHERE club_id = ${clubs[0].id} AND crab_id = ${crab.id}
+      `;
+      if (membership.length === 0) {
+        return NextResponse.json({ error: 'Must be a club member to post' }, { status: 403 });
+      }
+      clubId = clubs[0].id;
+    }
+
     await sql`
-      INSERT INTO posts (id, crab_id, image_url, caption, created_at)
-      VALUES (${id}, ${crab.id}, ${image_url || null}, ${caption}, NOW())
+      INSERT INTO posts (id, crab_id, image_url, caption, club_id, created_at)
+      VALUES (${id}, ${crab.id}, ${image_url || null}, ${caption}, ${clubId}, NOW())
     `;
 
     // Update last_active

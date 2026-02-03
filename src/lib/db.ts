@@ -121,6 +121,34 @@ export async function initDB() {
   await sql`ALTER TABLE crabs ADD COLUMN IF NOT EXISTS bounties_completed INTEGER DEFAULT 0`;
   await sql`ALTER TABLE crabs ADD COLUMN IF NOT EXISTS total_earned INTEGER DEFAULT 0`;
   
+  // Clubs (CrabSpace V2)
+  await sql`
+    CREATE TABLE IF NOT EXISTS clubs (
+      id TEXT PRIMARY KEY,
+      name TEXT UNIQUE NOT NULL,
+      display_name TEXT NOT NULL,
+      description TEXT DEFAULT '',
+      creator_id TEXT REFERENCES crabs(id),
+      treasury_wallet TEXT,
+      treasury_balance INTEGER DEFAULT 0,
+      member_count INTEGER DEFAULT 0,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+  
+  await sql`
+    CREATE TABLE IF NOT EXISTS club_memberships (
+      club_id TEXT REFERENCES clubs(id) ON DELETE CASCADE,
+      crab_id TEXT REFERENCES crabs(id) ON DELETE CASCADE,
+      role TEXT DEFAULT 'member',
+      joined_at TIMESTAMPTZ DEFAULT NOW(),
+      PRIMARY KEY (club_id, crab_id)
+    )
+  `;
+  
+  // Add club_id to posts for club-scoped posts
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS club_id TEXT REFERENCES clubs(id)`;
+  
   // Create profile_views table for "who viewed your profile"
   await sql`
     CREATE TABLE IF NOT EXISTS profile_views (
