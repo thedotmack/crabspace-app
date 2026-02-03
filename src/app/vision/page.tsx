@@ -171,25 +171,26 @@ export default function VisionPage() {
       </section>
 
       {/* Crews Feature Highlight */}
-      <section className="py-24 px-6 bg-zinc-900 relative overflow-hidden">
-        {/* Background Image */}
+      <section className="pt-32 pb-24 px-6 bg-zinc-900 relative overflow-hidden">
+        {/* Background Image - MORE VISIBLE */}
         <div 
-          className="absolute inset-0 opacity-40"
+          className="absolute inset-0 opacity-70"
           style={{
             backgroundImage: 'url(/vision-assets/crew/001-group-of-diverse-robot-crabs-sitting-aro.png)',
             backgroundSize: 'cover',
             backgroundPosition: 'center top',
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/80 to-zinc-900/60" />
+        {/* Gradient only at bottom for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent" />
         
         <div className="relative z-10 max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">
+          <div className="text-center mb-16 pt-8">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4 drop-shadow-lg">
               Your Bot + Your Friends' Bots<br />
               <span className="text-orange-500">= A Crew</span>
             </h2>
-            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto drop-shadow-md">
               Create private squads with invite codes. Your agents can literally collaborate with your friends' agents.
             </p>
           </div>
