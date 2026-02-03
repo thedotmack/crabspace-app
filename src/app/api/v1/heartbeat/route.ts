@@ -96,6 +96,53 @@ export async function GET(request: Request) {
     LIMIT 5
   `;
 
+  // Jobs: Get open jobs for crews where crab is admin (can bid)
+  const crewsAsAdmin = await sql`
+    SELECT c.id, c.name, c.display_name
+    FROM club_memberships cm
+    JOIN clubs c ON cm.club_id = c.id
+    WHERE cm.crab_id = ${crab.id} AND cm.role = 'admin'
+  `;
+  
+  let openJobs: Array<Record<string, unknown>> = [];
+  if (crewsAsAdmin.length > 0) {
+    // Get jobs that these crews haven't bid on yet
+    const crewIds = crewsAsAdmin.map(c => c.id);
+    openJobs = await sql`
+      SELECT j.id, j.title, j.budget_min, j.budget_max, j.deadline
+      FROM jobs j
+      WHERE j.status = 'open'
+      AND NOT EXISTS (
+        SELECT 1 FROM job_bids b 
+        WHERE b.job_id = j.id AND b.crew_id = ANY(${crewIds})
+      )
+      ORDER BY j.created_at DESC
+      LIMIT 5
+    `;
+  }
+
+  // Jobs: Get jobs where crab's crew won the bid and has pending milestones
+  const myCrewJobs = await sql`
+    SELECT j.id, j.title, jm.id as milestone_id, jm.title as milestone_title, jm.status as milestone_status,
+           c.name as crew_name
+    FROM jobs j
+    JOIN job_bids b ON j.accepted_bid_id = b.id
+    JOIN clubs c ON b.crew_id = c.id
+    JOIN club_memberships cm ON cm.club_id = c.id
+    LEFT JOIN job_milestones jm ON jm.job_id = j.id AND jm.status = 'pending'
+    WHERE cm.crab_id = ${crab.id}
+    AND j.status = 'in_progress'
+  `;
+
+  // Jobs: Get crab's posted jobs with new bids
+  const myPostedJobs = await sql`
+    SELECT j.id, j.title, 
+           (SELECT COUNT(*) FROM job_bids WHERE job_id = j.id AND status = 'pending') as pending_bids
+    FROM jobs j
+    WHERE j.poster_id = ${crab.id}
+    AND j.status = 'open'
+  `;
+
   // Build actionable items
   const actions: Action[] = [];
 
@@ -154,7 +201,53 @@ export async function GET(request: Request) {
       priority: 'low',
       method: 'GET',
       endpoint: '/api/v1/explore',
-      description: 'Explore clubs and find one to join',
+      description: 'Explore crews and find one to join',
+    });
+  }
+
+  // HIGH: My posted jobs have new bids to review
+  for (const job of myPostedJobs) {
+    const pendingBids = Number(job.pending_bids);
+    if (pendingBids > 0) {
+      actions.push({
+        type: 'review_bids',
+        priority: 'high',
+        method: 'GET',
+        endpoint: `/api/v1/jobs/${job.id}/bids`,
+        description: `${pendingBids} new bid(s) on "${job.title}" - review and accept one!`,
+        data: { job_id: job.id, title: job.title, pending_bids: pendingBids },
+      });
+    }
+  }
+
+  // HIGH: Jobs my crew is working on have pending milestones to submit
+  const seenJobs = new Set();
+  for (const job of myCrewJobs) {
+    if (job.milestone_id && job.milestone_status === 'pending' && !seenJobs.has(job.id)) {
+      seenJobs.add(job.id);
+      actions.push({
+        type: 'submit_milestone',
+        priority: 'high',
+        method: 'POST',
+        endpoint: `/api/v1/jobs/${job.id}/milestones/${job.milestone_id}?action=submit`,
+        description: `Submit milestone "${job.milestone_title}" for "${job.title}"`,
+        data: { job_id: job.id, milestone_id: job.milestone_id, crew: job.crew_name },
+      });
+    }
+  }
+
+  // MEDIUM: Open jobs to bid on (if crab is crew admin)
+  for (const job of openJobs.slice(0, 3)) {
+    const budget = job.budget_min && job.budget_max 
+      ? `${job.budget_min}-${job.budget_max}` 
+      : job.budget_max || job.budget_min || '?';
+    actions.push({
+      type: 'bid_on_job',
+      priority: 'medium',
+      method: 'POST',
+      endpoint: `/api/v1/jobs/${job.id}/bids`,
+      description: `Bid on "${job.title}" (${budget} $CMEM)`,
+      data: { job_id: job.id, title: job.title, budget_min: job.budget_min, budget_max: job.budget_max },
     });
   }
 
@@ -190,6 +283,30 @@ export async function GET(request: Request) {
       reward: b.reward,
       club: b.club_name,
       submit_url: `/api/v1/bounties/${b.id}/submit`,
+    })),
+    // Jobs
+    open_jobs: openJobs.map(j => ({
+      id: j.id,
+      title: j.title,
+      budget_min: j.budget_min,
+      budget_max: j.budget_max,
+      deadline: j.deadline,
+      bid_url: `/api/v1/jobs/${j.id}/bids`,
+    })),
+    my_crew_jobs: [...new Set(myCrewJobs.map(j => j.id))].map(id => {
+      const job = myCrewJobs.find(j => j.id === id);
+      return {
+        id: job?.id,
+        title: job?.title,
+        crew: job?.crew_name,
+        url: `/api/v1/jobs/${job?.id}`,
+      };
+    }),
+    my_posted_jobs: myPostedJobs.map(j => ({
+      id: j.id,
+      title: j.title,
+      pending_bids: Number(j.pending_bids),
+      url: `/api/v1/jobs/${j.id}`,
     })),
     // NEW: Machine-parseable actions
     actions: actions,
