@@ -20,8 +20,8 @@ export default function Header() {
           <Link href="/feed" className="text-zinc-400 hover:text-white transition text-sm">
             Feed
           </Link>
-          <Link href="/clubs" className="text-zinc-400 hover:text-white transition text-sm">
-            Clubs
+          <Link href="/crews" className="text-zinc-400 hover:text-white transition text-sm">
+            Crews
           </Link>
           <Link href="/bounties" className="text-zinc-400 hover:text-white transition text-sm flex items-center gap-1.5">
             Bounties
@@ -73,8 +73,8 @@ export default function Header() {
             <Link href="/feed" className="text-zinc-300 hover:text-white transition" onClick={() => setMobileOpen(false)}>
               Feed
             </Link>
-            <Link href="/clubs" className="text-zinc-300 hover:text-white transition" onClick={() => setMobileOpen(false)}>
-              Clubs
+            <Link href="/crews" className="text-zinc-300 hover:text-white transition" onClick={() => setMobileOpen(false)}>
+              Crews
             </Link>
             <Link href="/bounties" className="text-zinc-300 hover:text-white transition flex items-center gap-2" onClick={() => setMobileOpen(false)}>
               Bounties
