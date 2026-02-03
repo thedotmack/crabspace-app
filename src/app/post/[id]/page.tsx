@@ -227,7 +227,6 @@ export default async function PostPage({ params }: PostPageProps) {
             <PostEngagement 
               postId={post.id}
               initialLikeCount={post.likeCount}
-              initialCommentCount={post.commentCount}
               cmemCost={post.cmemCost}
               comments={post.comments}
             />

@@ -110,18 +110,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check daily_interactions for anti-farming
-    const existingDaily = await sql`
-      SELECT * FROM daily_interactions 
-      WHERE from_crab_id = ${crab.id} 
-        AND to_crab_id = ${posterCrabId} 
-        AND interaction_date = CURRENT_DATE
+    // Atomically try to claim daily interaction (race-safe)
+    // Insert base reward first - if row exists, returns empty (conflict)
+    const insertResult = await sql`
+      INSERT INTO daily_interactions (from_crab_id, to_crab_id, interaction_date, cmem_earned)
+      VALUES (${crab.id}, ${posterCrabId}, CURRENT_DATE, ${BASE_CMEM_REWARD})
+      ON CONFLICT (from_crab_id, to_crab_id, interaction_date) DO NOTHING
+      RETURNING id
     `;
-
-    const alreadyEarnedToday = existingDaily.length > 0;
+    
+    const alreadyEarnedToday = insertResult.length === 0;
     let cmemEarned = 0;
 
-    // Only pay if haven't interacted with this crab today
+    // Only pay if we actually inserted (won the race)
     if (!alreadyEarnedToday) {
       cmemEarned = BASE_CMEM_REWARD;
 
@@ -133,18 +134,23 @@ export async function POST(request: NextRequest) {
 
       if (boostRows.length > 0 && boostRows[0].boost_amount > 0) {
         cmemEarned += Number(boostRows[0].boost_amount);
+        // Update the daily_interactions record with boosted amount
+        await sql`
+          UPDATE daily_interactions 
+          SET cmem_earned = ${cmemEarned}
+          WHERE from_crab_id = ${crab.id} 
+            AND to_crab_id = ${posterCrabId} 
+            AND interaction_date = CURRENT_DATE
+        `;
       }
 
-      // Record daily interaction
-      await sql`
-        INSERT INTO daily_interactions (from_crab_id, to_crab_id, interaction_date, cmem_earned)
-        VALUES (${crab.id}, ${posterCrabId}, CURRENT_DATE, ${cmemEarned})
-        ON CONFLICT (from_crab_id, to_crab_id, interaction_date) DO NOTHING
-      `;
-
       // Send CMEM reward if crab has wallet
-      if (crab.solanaWallet) {
-        await sendCmemReward(crab.solanaWallet, cmemEarned, crab.username);
+      if (crab.solanaWallet && cmemEarned > 0) {
+        const transferSuccess = await sendCmemReward(crab.solanaWallet, cmemEarned, crab.username);
+        if (!transferSuccess) {
+          console.error('CMEM transfer failed for', crab.username);
+          cmemEarned = 0; // Don't report earned if transfer failed
+        }
       }
     }
 
