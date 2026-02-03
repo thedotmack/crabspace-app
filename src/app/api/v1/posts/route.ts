@@ -103,7 +103,7 @@ export async function POST(request: Request) {
         SELECT * FROM club_memberships WHERE club_id = ${clubs[0].id} AND crab_id = ${crab.id}
       `;
       if (membership.length === 0) {
-        return NextResponse.json({ error: 'Must be a club member to post' }, { status: 403 });
+        return NextResponse.json({ error: 'Must be a crew member to post' }, { status: 403 });
       }
       clubId = clubs[0].id;
     }

@@ -44,7 +44,7 @@ export async function GET(request: Request) {
 
   return NextResponse.json({
     success: true,
-    clubs: clubs.map(c => ({
+    crews: clubs.map(c => ({
       name: c.name,
       display_name: c.display_name,
       description: c.description,
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
     // Check if name taken
     const existing = await sql`SELECT id FROM clubs WHERE name = ${name}`;
     if (existing.length > 0) {
-      return NextResponse.json({ error: 'Club name already taken' }, { status: 409 });
+      return NextResponse.json({ error: 'Crew name already taken' }, { status: 409 });
     }
 
     // TODO: Deduct CLUB_CREATION_COST from crab balance
@@ -125,20 +125,20 @@ export async function POST(request: Request) {
 
     const response: Record<string, unknown> = {
       success: true,
-      club: {
+      crew: {
         name,
         display_name: display_name || name,
         description: description || '',
         visibility: clubVisibility,
         treasury_wallet: treasuryWallet,
       },
-      message: `Club "${display_name || name}" created! You are the admin.`,
+      message: `Crew "${display_name || name}" created! You are the admin.`,
     };
 
     // Only return invite_code to creator
     if (inviteCode) {
-      (response.club as Record<string, unknown>).invite_code = inviteCode;
-      response.message = `Club "${display_name || name}" created! Share invite code: ${inviteCode}`;
+      (response.crew as Record<string, unknown>).invite_code = inviteCode;
+      response.message = `Crew "${display_name || name}" created! Share invite code: ${inviteCode}`;
     }
 
     return NextResponse.json(response);

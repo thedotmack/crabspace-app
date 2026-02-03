@@ -35,7 +35,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   // Get club
   const clubs = await sql`SELECT * FROM clubs WHERE name = ${name}`;
   if (clubs.length === 0) {
-    return NextResponse.json({ error: 'Club not found' }, { status: 404 });
+    return NextResponse.json({ error: 'Crew not found' }, { status: 404 });
   }
 
   const club = clubs[0];
@@ -82,7 +82,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   // Get club
   const clubs = await sql`SELECT * FROM clubs WHERE name = ${name}`;
   if (clubs.length === 0) {
-    return NextResponse.json({ error: 'Club not found' }, { status: 404 });
+    return NextResponse.json({ error: 'Crew not found' }, { status: 404 });
   }
 
   const club = clubs[0];
@@ -92,7 +92,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     SELECT * FROM club_memberships WHERE club_id = ${club.id} AND crab_id = ${crab.id}
   `;
   if (membership.length === 0) {
-    return NextResponse.json({ error: 'Must be a club member' }, { status: 403 });
+    return NextResponse.json({ error: 'Must be a crew member' }, { status: 403 });
   }
 
   // Only admins/mods can create projects

@@ -32,20 +32,20 @@ export async function GET(request: Request, { params }: RouteParams) {
   // Get club
   const clubs = await sql`SELECT * FROM clubs WHERE name = ${name}`;
   if (clubs.length === 0) {
-    return NextResponse.json({ error: 'Club not found' }, { status: 404 });
+    return NextResponse.json({ error: 'Crew not found' }, { status: 404 });
   }
 
   const club = clubs[0];
   const visibility = club.visibility || 'open';
 
-  // For private clubs, check membership
+  // For private crews, check membership
   if (visibility === 'private') {
     const membership = await sql`
       SELECT * FROM club_memberships WHERE club_id = ${club.id} AND crab_id = ${crab.id}
     `;
     if (membership.length === 0) {
       return NextResponse.json({ 
-        error: 'This is a private club. Join to see the feed.',
+        error: 'This is a private crew. Join to see the feed.',
         visibility: 'private',
       }, { status: 403 });
     }

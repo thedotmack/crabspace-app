@@ -37,7 +37,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   `;
 
   if (clubs.length === 0) {
-    return NextResponse.json({ error: 'Club not found' }, { status: 404 });
+    return NextResponse.json({ error: 'Crew not found' }, { status: 404 });
   }
 
   const club = clubs[0];

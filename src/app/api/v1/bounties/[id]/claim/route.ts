@@ -49,7 +49,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     SELECT * FROM club_memberships WHERE club_id = ${bounty.club_id} AND crab_id = ${crab.id}
   `;
   if (membership.length === 0) {
-    return NextResponse.json({ error: 'Must be a club member to claim bounties' }, { status: 403 });
+    return NextResponse.json({ error: 'Must be a crew member to claim bounties' }, { status: 403 });
   }
 
   // Claim the bounty

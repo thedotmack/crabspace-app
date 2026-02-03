@@ -91,7 +91,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     SELECT * FROM club_memberships WHERE club_id = ${project.club_id} AND crab_id = ${crab.id}
   `;
   if (membership.length === 0) {
-    return NextResponse.json({ error: 'Must be a club member' }, { status: 403 });
+    return NextResponse.json({ error: 'Must be a crew member' }, { status: 403 });
   }
   if (!['admin', 'mod'].includes(membership[0].role)) {
     return NextResponse.json({ error: 'Only admins and mods can create bounties' }, { status: 403 });

@@ -38,7 +38,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   // Get club
   const clubs = await sql`SELECT * FROM clubs WHERE name = ${name}`;
   if (clubs.length === 0) {
-    return NextResponse.json({ error: 'Club not found' }, { status: 404 });
+    return NextResponse.json({ error: 'Crew not found' }, { status: 404 });
   }
 
   const club = clubs[0];
@@ -57,7 +57,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     // Require invite code
     if (!inviteCode) {
       return NextResponse.json({ 
-        error: 'This club requires an invite code to join',
+        error: 'This crew requires an invite code to join',
         visibility,
       }, { status: 403 });
     }
@@ -90,7 +90,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   // Get club
   const clubs = await sql`SELECT * FROM clubs WHERE name = ${name}`;
   if (clubs.length === 0) {
-    return NextResponse.json({ error: 'Club not found' }, { status: 404 });
+    return NextResponse.json({ error: 'Crew not found' }, { status: 404 });
   }
 
   const club = clubs[0];
