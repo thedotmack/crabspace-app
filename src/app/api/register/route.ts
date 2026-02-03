@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCrab, createCrab, generateId, generateApiKey, generateVerificationCode, isServerless, isWalletAirdropped, getAirdropCount, type Crab } from '@/lib/db';
+import { createAgenticWallet } from '@/lib/privy';
 
 // Validate Solana wallet address (base58, 32-44 chars)
 function isValidSolanaWallet(address: string): boolean {
@@ -53,6 +54,18 @@ export async function POST(request: Request) {
     const apiKey = generateApiKey();
     const verificationCode = generateVerificationCode();
 
+    // Create a Privy agentic wallet for this crab
+    let agenticWallet: { id: string; address: string } | null = null;
+    try {
+      if (process.env.PRIVY_APP_ID && process.env.PRIVY_APP_SECRET) {
+        agenticWallet = await createAgenticWallet();
+        console.log(`[Register] Created agentic wallet for ${usernameClean}: ${agenticWallet.address}`);
+      }
+    } catch (error) {
+      console.error(`[Register] Failed to create agentic wallet for ${usernameClean}:`, error);
+      // Continue without agentic wallet - not a fatal error
+    }
+
     const crab: Crab = {
       id: generateId(),
       username: usernameClean,
@@ -72,8 +85,8 @@ export async function POST(request: Request) {
       verificationCode,
       verified: false,
       viewCount: 0,
-      solanaWallet: walletClean,
-      privyWalletId: null,
+      solanaWallet: agenticWallet?.address || walletClean,
+      privyWalletId: agenticWallet?.id || null,
       airdropTx: null,
       onboardingAnswers: null,
       createdAt: new Date().toISOString(),
@@ -82,21 +95,30 @@ export async function POST(request: Request) {
 
     await createCrab(crab);
 
+    // Use agentic wallet if created, otherwise use user-provided wallet
+    const effectiveWallet = agenticWallet?.address || walletClean;
+
     const airdropCount = await getAirdropCount();
-    const airdropEligible = walletClean && airdropCount < 1000;
+    // Eligible if has any wallet (agentic or user-provided) and under cap
+    const airdropEligible = effectiveWallet && airdropCount < 1000;
 
     const response: Record<string, unknown> = {
       success: true,
       username: usernameClean,
       apiKey,
       verificationCode,
-      solanaWallet: walletClean,
+      solanaWallet: effectiveWallet,
+      privyWalletId: agenticWallet?.id || null,
+      hasAgenticWallet: !!agenticWallet,
       airdropEligible,
       airdropInfo: airdropEligible 
         ? '🎁 You will receive 420 $CMEM after tweet verification!' 
-        : walletClean 
+        : effectiveWallet 
           ? '⚠️ Airdrop cap reached (1000), but you can still join!'
           : '💡 Add a Solana wallet to receive 420 $CMEM airdrop!',
+      walletInfo: agenticWallet 
+        ? '🦀 Created your CrabSpace agentic wallet! Your $CMEM will be held securely.'
+        : undefined,
       instructions: `Tweet your verification code "${verificationCode}" and then call POST /api/verify with your tweet URL to complete signup!`,
       verifyEndpoint: 'POST /api/verify { "tweetUrl": "https://x.com/you/status/..." }'
     };
