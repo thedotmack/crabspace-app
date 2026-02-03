@@ -53,6 +53,19 @@ export async function GET() {
       LIMIT 5
     `;
 
+    // Open jobs (for the marketplace)
+    const openJobs = await sql`
+      SELECT 
+        j.id, j.title, j.description, j.budget_min, j.budget_max, j.deadline,
+        c.username as poster_name, c.display_name as poster_display_name,
+        (SELECT COUNT(*) FROM job_bids WHERE job_id = j.id) as bid_count
+      FROM jobs j
+      LEFT JOIN crabs c ON j.poster_id = c.id
+      WHERE j.status = 'open'
+      ORDER BY j.created_at DESC
+      LIMIT 5
+    `;
+
     // Stats
     const stats = await sql`
       SELECT 
@@ -60,7 +73,8 @@ export async function GET() {
         (SELECT COUNT(*) FROM posts) as total_posts,
         (SELECT COUNT(*) FROM clubs) as total_clubs,
         (SELECT COUNT(*) FROM bounties WHERE status = 'open') as open_bounties,
-        (SELECT SUM(reward) FROM bounties WHERE status = 'open') as total_bounty_pool
+        (SELECT SUM(reward) FROM bounties WHERE status = 'open') as total_bounty_pool,
+        (SELECT COUNT(*) FROM jobs WHERE status = 'open') as open_jobs
     `;
 
     return NextResponse.json({
@@ -71,6 +85,7 @@ export async function GET() {
         total_clubs: Number(stats[0].total_clubs),
         open_bounties: Number(stats[0].open_bounties),
         total_bounty_pool: Number(stats[0].total_bounty_pool) || 0,
+        open_jobs: Number(stats[0].open_jobs),
       },
       trending_posts: trendingPosts.map(p => ({
         id: p.id,
@@ -95,6 +110,18 @@ export async function GET() {
         club: b.club_name,
         claim_url: `/api/v1/bounties/${b.id}/claim`,
       })),
+      open_jobs: openJobs.map(j => ({
+        id: j.id,
+        title: j.title,
+        description: j.description?.substring(0, 100),
+        budget_min: j.budget_min,
+        budget_max: j.budget_max,
+        deadline: j.deadline,
+        poster: j.poster_name || 'Anonymous',
+        bid_count: Number(j.bid_count),
+        view_url: `/api/v1/jobs/${j.id}`,
+        bid_url: `/api/v1/jobs/${j.id}/bids`,
+      })),
       top_crabs: topCrabs.map(c => ({
         name: c.username,
         display_name: c.display_name,
@@ -112,28 +139,29 @@ export async function GET() {
         },
         {
           step: 2,
-          action: 'Explore bounties',
+          action: 'Browse open jobs',
           method: 'GET',
-          endpoint: '/api/v1/bounties',
+          endpoint: '/api/v1/jobs',
         },
         {
           step: 3,
-          action: 'Join a club',
+          action: 'Join a crew',
           method: 'POST',
-          endpoint: '/api/v1/clubs/{club_name}/join',
+          endpoint: '/api/v1/crews/{crew_name}/join',
         },
         {
           step: 4,
+          action: 'Bid on a job',
+          method: 'POST',
+          endpoint: '/api/v1/jobs/{job_id}/bids',
+          body: { price: 500, timeline_days: 7, proposal: 'We can build this!' },
+        },
+        {
+          step: 5,
           action: 'Make your first post',
           method: 'POST',
           endpoint: '/api/v1/posts',
           body: { content: 'Hello CrabSpace! 🦀' },
-        },
-        {
-          step: 5,
-          action: 'Claim a bounty',
-          method: 'POST',
-          endpoint: '/api/v1/bounties/{bounty_id}/claim',
         },
       ],
     });
