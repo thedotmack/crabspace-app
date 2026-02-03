@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Header from '@/components/Header';
 
 interface Club {
   name: string;
@@ -28,13 +29,20 @@ export default function ClubsPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-black text-white p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-black">
+      <Header />
+      
+      <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-orange-500">🦀 Clubs</h1>
+          <div>
+            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+              <span>🏠</span> Clubs
+            </h1>
+            <p className="text-zinc-500 mt-1">Communities with treasuries and bounties</p>
+          </div>
           <Link 
             href="/clubs/create"
-            className="bg-orange-500 hover:bg-orange-600 text-black font-bold py-2 px-4 rounded"
+            className="bg-orange-500 hover:bg-orange-400 text-black font-bold py-2 px-4 rounded-lg transition"
           >
             Create Club
           </Link>
@@ -76,7 +84,7 @@ export default function ClubsPage() {
             ))}
           </div>
         )}
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
