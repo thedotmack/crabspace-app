@@ -24,8 +24,16 @@ export async function POST(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-
   const { name } = await params;
+
+  // Parse body for invite_code (optional)
+  let inviteCode: string | null = null;
+  try {
+    const body = await request.json();
+    inviteCode = body.invite_code || null;
+  } catch {
+    // No body or invalid JSON - that's fine for open clubs
+  }
 
   // Get club
   const clubs = await sql`SELECT * FROM clubs WHERE name = ${name}`;
@@ -34,6 +42,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   }
 
   const club = clubs[0];
+  const visibility = club.visibility || 'open';
 
   // Check if already member
   const existing = await sql`
@@ -41,6 +50,20 @@ export async function POST(request: Request, { params }: RouteParams) {
   `;
   if (existing.length > 0) {
     return NextResponse.json({ success: true, message: 'Already a member' });
+  }
+
+  // Check visibility rules
+  if (visibility === 'closed' || visibility === 'private') {
+    // Require invite code
+    if (!inviteCode) {
+      return NextResponse.json({ 
+        error: 'This club requires an invite code to join',
+        visibility,
+      }, { status: 403 });
+    }
+    if (inviteCode !== club.invite_code) {
+      return NextResponse.json({ error: 'Invalid invite code' }, { status: 403 });
+    }
   }
 
   // Join

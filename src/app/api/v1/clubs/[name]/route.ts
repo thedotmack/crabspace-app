@@ -62,12 +62,21 @@ export async function GET(request: Request, { params }: RouteParams) {
     LIMIT 5
   `;
 
-  return NextResponse.json({
+  const isMember = membership.length > 0;
+  const userRole = membership[0]?.role || null;
+  const isAdmin = userRole === 'admin';
+  const visibility = club.visibility || 'open';
+
+  // For private clubs, hide recent posts from non-members
+  const showPosts = visibility !== 'private' || isMember;
+
+  const response: Record<string, unknown> = {
     success: true,
     club: {
       name: club.name,
       display_name: club.display_name,
       description: club.description,
+      visibility,
       member_count: Number(memberCount[0].count),
       treasury_balance: club.treasury_balance,
       treasury_wallet: club.treasury_wallet,
@@ -77,13 +86,20 @@ export async function GET(request: Request, { params }: RouteParams) {
       },
       created_at: club.created_at,
     },
-    is_member: membership.length > 0,
-    role: membership[0]?.role || null,
-    recent_posts: recentPosts.map(p => ({
+    is_member: isMember,
+    role: userRole,
+    recent_posts: showPosts ? recentPosts.map(p => ({
       id: p.id,
       content: p.caption,
       author: p.author_name,
       created_at: p.created_at,
-    })),
-  });
+    })) : [],
+  };
+
+  // Only show invite_code to admins
+  if (isAdmin && club.invite_code) {
+    (response.club as Record<string, unknown>).invite_code = club.invite_code;
+  }
+
+  return NextResponse.json(response);
 }

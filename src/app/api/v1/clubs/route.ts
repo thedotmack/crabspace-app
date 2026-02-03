@@ -20,6 +20,11 @@ function generateId(): string {
   return Math.random().toString(36).substring(2, 15);
 }
 
+function generateInviteCode(clubName: string): string {
+  const suffix = Math.random().toString(36).substring(2, 6);
+  return `${clubName.substring(0, 8)}-${suffix}`;
+}
+
 // GET /api/v1/clubs - List all clubs
 export async function GET(request: Request) {
   const crab = await getAuthCrab(request);
@@ -43,6 +48,7 @@ export async function GET(request: Request) {
       name: c.name,
       display_name: c.display_name,
       description: c.description,
+      visibility: c.visibility || 'open',
       member_count: Number(c.member_count),
       treasury_balance: c.treasury_balance,
       creator: c.creator_name,
@@ -64,7 +70,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { name, display_name, description } = body;
+    const { name, display_name, description, visibility } = body;
 
     if (!name || typeof name !== 'string') {
       return NextResponse.json({ error: 'name is required' }, { status: 400 });
@@ -77,6 +83,10 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
+    // Validate visibility
+    const validVisibility = ['open', 'closed', 'private'];
+    const clubVisibility = visibility && validVisibility.includes(visibility) ? visibility : 'open';
+
     // Check if name taken
     const existing = await sql`SELECT id FROM clubs WHERE name = ${name}`;
     if (existing.length > 0) {
@@ -87,6 +97,9 @@ export async function POST(request: Request) {
     // For now, skip cost check
 
     const id = generateId();
+
+    // Generate invite code for closed/private clubs
+    const inviteCode = clubVisibility !== 'open' ? generateInviteCode(name) : null;
 
     // Create treasury wallet for the club
     let treasuryWallet = null;
@@ -100,8 +113,8 @@ export async function POST(request: Request) {
     }
 
     await sql`
-      INSERT INTO clubs (id, name, display_name, description, creator_id, treasury_wallet)
-      VALUES (${id}, ${name}, ${display_name || name}, ${description || ''}, ${crab.id}, ${treasuryWallet})
+      INSERT INTO clubs (id, name, display_name, description, creator_id, treasury_wallet, visibility, invite_code)
+      VALUES (${id}, ${name}, ${display_name || name}, ${description || ''}, ${crab.id}, ${treasuryWallet}, ${clubVisibility}, ${inviteCode})
     `;
 
     // Creator auto-joins as admin
@@ -110,16 +123,25 @@ export async function POST(request: Request) {
       VALUES (${id}, ${crab.id}, 'admin')
     `;
 
-    return NextResponse.json({
+    const response: Record<string, unknown> = {
       success: true,
       club: {
         name,
         display_name: display_name || name,
         description: description || '',
+        visibility: clubVisibility,
         treasury_wallet: treasuryWallet,
       },
       message: `Club "${display_name || name}" created! You are the admin.`,
-    });
+    };
+
+    // Only return invite_code to creator
+    if (inviteCode) {
+      (response.club as Record<string, unknown>).invite_code = inviteCode;
+      response.message = `Club "${display_name || name}" created! Share invite code: ${inviteCode}`;
+    }
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Club creation error:', error);
     return NextResponse.json({ error: 'Failed to create club' }, { status: 500 });

@@ -36,6 +36,20 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 
   const club = clubs[0];
+  const visibility = club.visibility || 'open';
+
+  // For private clubs, check membership
+  if (visibility === 'private') {
+    const membership = await sql`
+      SELECT * FROM club_memberships WHERE club_id = ${club.id} AND crab_id = ${crab.id}
+    `;
+    if (membership.length === 0) {
+      return NextResponse.json({ 
+        error: 'This is a private club. Join to see the feed.',
+        visibility: 'private',
+      }, { status: 403 });
+    }
+  }
 
   const posts = await sql`
     SELECT 

@@ -136,6 +136,10 @@ export async function initDB() {
     )
   `;
   
+  // Add visibility and invite_code columns to clubs (migration)
+  await sql`ALTER TABLE clubs ADD COLUMN IF NOT EXISTS visibility TEXT DEFAULT 'open'`;
+  await sql`ALTER TABLE clubs ADD COLUMN IF NOT EXISTS invite_code TEXT`;
+  
   await sql`
     CREATE TABLE IF NOT EXISTS club_memberships (
       club_id TEXT REFERENCES clubs(id) ON DELETE CASCADE,
