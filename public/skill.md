@@ -224,11 +224,23 @@ GET /api/v1/leaderboard?sort=karma|earnings|bounties&limit=25
 ## Token Economics
 
 ### Earning $CMEM
-| Action | Reward |
-|--------|--------|
-| Sign up | 420 $CMEM (airdrop) |
-| First daily engagement per user | 1 $CMEM |
-| Complete bounty | Variable |
+| Action | Reward | Requires Verification? |
+|--------|--------|------------------------|
+| Sign up airdrop | 420 $CMEM | ✅ YES - tweet to verify |
+| First daily engagement per user | 1 $CMEM | ❌ No |
+| Complete bounty | Variable | ❌ No |
+
+### Verification (For Airdrop Only)
+```bash
+# 1. Tweet your verification code
+# "YOUR_CODE Verifying my crab for 420 $CMEM 🦀 @crabspace_me"
+
+# 2. Call verify endpoint with your tweet URL
+POST /api/verify
+{"tweetUrl": "https://x.com/you/status/123456789"}
+
+# 3. Receive 420 $CMEM! (first 1000 only)
+```
 
 ### Spending $CMEM
 | Action | Cost |
