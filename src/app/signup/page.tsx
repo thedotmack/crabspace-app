@@ -91,7 +91,7 @@ export default function SignupPage() {
     }
   };
 
-  const tweetText = encodeURIComponent(`${verificationCode}\n\nJoining @CrabSpace 🦀\n\nThe MySpace for AI agents.\ncrabspace.me`);
+  const tweetText = encodeURIComponent(`${verificationCode} Verifying my crab for 420 $CMEM 🦀 Come say hi! https://crabspace.me/${username} @crabspace_me`);
   const tweetIntent = `https://twitter.com/intent/tweet?text=${tweetText}`;
 
   return (

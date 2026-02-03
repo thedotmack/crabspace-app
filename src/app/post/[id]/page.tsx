@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Sparkles from '@/components/Sparkles';
+import PostEngagement from './PostEngagement';
 
 interface PostComment {
   id: string;
@@ -186,27 +187,6 @@ export default async function PostPage({ params }: PostPageProps) {
               </Link>
             </div>
 
-            {/* Stats Row */}
-            <div 
-              className="flex gap-6 mb-4 pb-4 border-b"
-              style={{ borderColor: '#FF00FF44' }}
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-xl">❤️</span>
-                <span style={{ color: '#00FF00' }}>{post.likeCount} likes</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl">💬</span>
-                <span style={{ color: '#00FF00' }}>{post.commentCount} comments</span>
-              </div>
-              {post.cmemCost > 0 && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">💰</span>
-                  <span style={{ color: '#FFD700' }}>{post.cmemCost} $CMEM</span>
-                </div>
-              )}
-            </div>
-
             {/* Caption */}
             {post.caption && (
               <div className="mb-4">
@@ -239,67 +219,18 @@ export default async function PostPage({ params }: PostPageProps) {
             )}
 
             {/* Timestamp */}
-            <p className="text-sm" style={{ color: '#00FF00', opacity: 0.5 }}>
+            <p className="text-sm mb-4" style={{ color: '#00FF00', opacity: 0.5 }}>
               {formatDate(post.createdAt)}
             </p>
 
-            {/* Comments Section */}
-            <div className="mt-6">
-              <h3 
-                className="text-lg font-bold mb-4"
-                style={{ color: '#FF00FF' }}
-              >
-                💬 Comments ({post.comments.length})
-              </h3>
-
-              {post.comments.length === 0 ? (
-                <div 
-                  className="text-center py-8 border-2 border-dashed"
-                  style={{ borderColor: '#FF00FF44', color: '#00FF00' }}
-                >
-                  <p className="opacity-70">No comments yet</p>
-                  <p className="text-sm opacity-50 mt-1">Be the first to comment!</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {post.comments.map((comment) => (
-                    <div 
-                      key={comment.id}
-                      className="flex gap-3 p-3 border"
-                      style={{ borderColor: '#FF00FF44', backgroundColor: 'rgba(0,0,0,0.3)' }}
-                    >
-                      <Link href={`/${comment.username}`}>
-                        <div 
-                          className="w-8 h-8 border flex items-center justify-center text-sm overflow-hidden shrink-0"
-                          style={{ borderColor: '#FF00FF' }}
-                        >
-                          {comment.avatarUrl ? (
-                            <img src={comment.avatarUrl} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            '🦀'
-                          )}
-                        </div>
-                      </Link>
-                      <div className="flex-1 min-w-0">
-                        <p style={{ color: '#00FF00' }}>
-                          <Link 
-                            href={`/${comment.username}`}
-                            className="font-bold hover:underline"
-                            style={{ color: '#FF00FF' }}
-                          >
-                            @{comment.username}
-                          </Link>{' '}
-                          {comment.commentText}
-                        </p>
-                        <p className="text-xs mt-1" style={{ color: '#00FF00', opacity: 0.4 }}>
-                          {formatDate(comment.createdAt)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* Engagement Section (Like button, comment input, comments list) */}
+            <PostEngagement 
+              postId={post.id}
+              initialLikeCount={post.likeCount}
+              initialCommentCount={post.commentCount}
+              cmemCost={post.cmemCost}
+              comments={post.comments}
+            />
           </div>
         </div>
 
