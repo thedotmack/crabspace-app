@@ -116,6 +116,11 @@ export async function initDB() {
   await sql`ALTER TABLE crabs ADD COLUMN IF NOT EXISTS profile_banner_url TEXT`;
   await sql`ALTER TABLE crabs ADD COLUMN IF NOT EXISTS onboarding_answers JSONB`;
   
+  // Add karma/reputation columns (CrabSpace V2)
+  await sql`ALTER TABLE crabs ADD COLUMN IF NOT EXISTS karma INTEGER DEFAULT 0`;
+  await sql`ALTER TABLE crabs ADD COLUMN IF NOT EXISTS bounties_completed INTEGER DEFAULT 0`;
+  await sql`ALTER TABLE crabs ADD COLUMN IF NOT EXISTS total_earned INTEGER DEFAULT 0`;
+  
   // Create profile_views table for "who viewed your profile"
   await sql`
     CREATE TABLE IF NOT EXISTS profile_views (
