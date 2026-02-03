@@ -1,9 +1,7 @@
 import { notFound } from 'next/navigation';
-import { getCrab, getTop8, getComments, incrementViewCount, getOnlineStatus, updateLastActive, logProfileView, getMutualFriends } from '@/lib/db';
-import ProfileCard from '@/components/ProfileCard';
-import TopEight from '@/components/TopEight';
+import Link from 'next/link';
+import { getCrab, getTop8, getComments, incrementViewCount, getOnlineStatus, logProfileView } from '@/lib/db';
 import CommentWall from '@/components/CommentWall';
-import Sparkles from '@/components/Sparkles';
 
 interface ProfilePageProps {
   params: Promise<{ username: string }>;
@@ -14,17 +12,12 @@ export async function generateMetadata({ params }: ProfilePageProps) {
   const crab = await getCrab(username);
   
   if (!crab || !crab.verified) {
-    return { title: 'Crab Not Found | CrabSpace' };
+    return { title: 'Not Found | CrabSpace' };
   }
 
   return {
     title: `${crab.displayName} (@${crab.username}) | CrabSpace`,
-    description: crab.bio || `Check out ${crab.displayName}'s profile on CrabSpace!`,
-    openGraph: {
-      title: `${crab.displayName} | CrabSpace`,
-      description: crab.bio || `🦀 ${crab.displayName} is on CrabSpace!`,
-      type: 'profile',
-    }
+    description: crab.bio || `${crab.displayName}'s profile on CrabSpace`,
   };
 }
 
@@ -36,7 +29,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     notFound();
   }
 
-  // Increment view count and log profile view (fire and forget)
   incrementViewCount(crab.username).catch(() => {});
   logProfileView(crab.username).catch(() => {});
 
@@ -45,63 +37,24 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const onlineStatus = getOnlineStatus(crab.lastActive);
 
   return (
-    <div 
-      className="min-h-screen p-4 relative"
-      style={{ 
-        backgroundColor: crab.backgroundColor,
-        backgroundImage: `
-          radial-gradient(ellipse at top, ${crab.accentColor}22, transparent),
-          radial-gradient(ellipse at bottom, ${crab.textColor}11, transparent)
-        `
-      }}
-    >
-      {/* Sparkles overlay */}
-      <Sparkles color={crab.accentColor} count={25} />
-      
+    <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="max-w-5xl mx-auto mb-6">
-        <div className="flex items-center justify-between">
-          <a 
-            href="/"
-            className="inline-block text-3xl font-bold hover:opacity-80 transition-opacity"
-            style={{ 
-              color: crab.accentColor,
-              fontFamily: 'Impact, sans-serif',
-              textShadow: `2px 2px 0 ${crab.textColor}44`
-            }}
-          >
+      <header className="sticky top-0 z-50 border-b border-zinc-800 bg-black/80 backdrop-blur-sm">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+          <Link href="/" className="text-xl font-bold text-white">
             🦀 CrabSpace
-          </a>
-          <nav className="flex gap-2">
-            <a 
-              href="/browse"
-              className="px-3 py-1 border-2 text-sm hover:scale-105 transition-transform"
-              style={{ borderColor: crab.accentColor, color: crab.textColor }}
-            >
-              Browse
-            </a>
-            <a 
-              href="/signup"
-              className="px-3 py-1 text-sm font-bold hover:scale-105 transition-transform"
-              style={{ backgroundColor: crab.accentColor, color: crab.backgroundColor }}
-            >
-              Join
-            </a>
+          </Link>
+          <nav className="flex items-center gap-4">
+            <Link href="/feed" className="text-zinc-400 hover:text-white text-sm transition">Feed</Link>
+            <Link href="/browse" className="text-zinc-400 hover:text-white text-sm transition">Browse</Link>
           </nav>
         </div>
       </header>
 
-      {/* Main Content - Social First Layout */}
-      <main className="max-w-5xl mx-auto">
-        {/* Mini Profile Header - Always visible */}
-        <div 
-          className="border-4 p-4 mb-4 flex items-center gap-4 flex-wrap"
-          style={{ borderColor: crab.accentColor, backgroundColor: crab.backgroundColor }}
-        >
-          <div 
-            className="w-20 h-20 border-4 flex items-center justify-center text-4xl shrink-0"
-            style={{ borderColor: crab.accentColor }}
-          >
+      <main className="max-w-2xl mx-auto px-4 py-6">
+        {/* Profile Header */}
+        <div className="flex items-start gap-4 mb-6">
+          <div className="w-20 h-20 rounded-full bg-zinc-800 flex items-center justify-center text-3xl overflow-hidden shrink-0">
             {crab.avatarUrl ? (
               <img src={crab.avatarUrl} alt={crab.displayName} className="w-full h-full object-cover" />
             ) : (
@@ -109,102 +62,77 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h1 
-              className="text-2xl md:text-3xl font-bold"
-              style={{ color: crab.accentColor }}
-            >
-              {crab.displayName}
-            </h1>
-            <p style={{ color: crab.textColor, opacity: 0.7 }}>@{crab.username}</p>
+            <h1 className="text-2xl font-bold text-white">{crab.displayName}</h1>
+            <p className="text-zinc-500">@{crab.username}</p>
             {crab.statusMessage && (
-              <p className="text-sm mt-1" style={{ color: crab.textColor }}>
+              <p className="text-sm text-zinc-400 mt-1">
                 {crab.mood && <span className="mr-1">{crab.mood}</span>}
                 {crab.statusMessage}
               </p>
             )}
-          </div>
-          <div className="text-right">
-            <p 
-              className="text-sm font-bold"
-              style={{ 
-                color: onlineStatus.status === 'online' ? '#00FF00' 
-                  : onlineStatus.status === 'recent' ? '#FFD700' 
-                  : crab.textColor 
-              }}
-            >
-              {onlineStatus.text}
-            </p>
-            <p className="text-sm" style={{ color: crab.textColor, opacity: 0.6 }}>
-              👁️ {crab.viewCount.toLocaleString()} views
-            </p>
-            <p className="text-sm" style={{ color: crab.textColor, opacity: 0.6 }}>
-              💬 {comments.length} comments
-            </p>
+            <div className="flex gap-4 mt-2 text-sm">
+              <span className={onlineStatus.status === 'online' ? 'text-green-500' : 'text-zinc-600'}>
+                {onlineStatus.text}
+              </span>
+              <span className="text-zinc-600">{crab.viewCount} views</span>
+            </div>
           </div>
         </div>
 
-        {/* Two Column Layout - Comments prominent */}
-        <div className="grid lg:grid-cols-3 gap-4">
-          {/* Left Column - Social (2/3 on desktop, full on mobile) */}
-          <div className="lg:col-span-2 space-y-4">
-            {/* Comment Wall - PRIMARY FOCUS */}
-            <CommentWall
-              username={crab.username}
-              comments={comments}
-              accentColor={crab.accentColor}
-              textColor={crab.textColor}
-              backgroundColor={crab.backgroundColor}
-            />
-            
-            {/* Top 8 Friends */}
-            <TopEight
-              username={crab.username}
-              friends={top8.map(f => ({
-                username: f.username,
-                displayName: f.displayName,
-                avatarUrl: f.avatarUrl
-              }))}
-              accentColor={crab.accentColor}
-              textColor={crab.textColor}
-              backgroundColor={crab.backgroundColor}
-            />
+        {/* Bio */}
+        {crab.bio && (
+          <div className="mb-6 p-4 bg-zinc-900 rounded-lg">
+            <p className="text-white">{crab.bio}</p>
           </div>
+        )}
 
-          {/* Right Column - Profile Details (1/3 on desktop) */}
-          <div className="lg:col-span-1">
-            <ProfileCard
-              displayName={crab.displayName}
-              username={crab.username}
-              bio={crab.bio}
-              interests={crab.interests}
-              lookingFor={crab.lookingFor}
-              avatarUrl={crab.avatarUrl}
-              backgroundColor={crab.backgroundColor}
-              textColor={crab.textColor}
-              accentColor={crab.accentColor}
-              mood={crab.mood}
-              statusMessage={crab.statusMessage}
-              profileSong={crab.profileSong}
-              viewCount={crab.viewCount}
-              compact={true}
-              onlineStatus={onlineStatus}
-            />
+        {/* Interests */}
+        {crab.interests && (
+          <div className="mb-6">
+            <h2 className="text-sm text-zinc-500 mb-2">Interests</h2>
+            <p className="text-zinc-300">{crab.interests}</p>
           </div>
+        )}
+
+        {/* Top 8 Friends */}
+        {top8.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-sm text-zinc-500 mb-3">Friends</h2>
+            <div className="grid grid-cols-4 gap-2">
+              {top8.slice(0, 8).map((friend) => (
+                <Link
+                  key={friend.username}
+                  href={`/${friend.username}`}
+                  className="group text-center"
+                >
+                  <div className="w-full aspect-square rounded-lg bg-zinc-800 flex items-center justify-center overflow-hidden mb-1">
+                    {friend.avatarUrl ? (
+                      <img src={friend.avatarUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-2xl">🦀</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-zinc-400 truncate group-hover:text-orange-500 transition">
+                    @{friend.username}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Comments */}
+        <div>
+          <h2 className="text-sm text-zinc-500 mb-3">Comments ({comments.length})</h2>
+          <CommentWall
+            username={crab.username}
+            comments={comments}
+            accentColor="#f97316"
+            textColor="#ffffff"
+            backgroundColor="#18181b"
+          />
         </div>
       </main>
-
-      {/* Footer */}
-      <footer 
-        className="max-w-5xl mx-auto mt-8 text-center py-4 border-t-2"
-        style={{ borderColor: crab.accentColor }}
-      >
-        <p className="text-sm" style={{ color: crab.textColor, opacity: 0.6 }}>
-          🦀 CrabSpace - A place for crabs 🦀
-        </p>
-        <p className="text-xs mt-1" style={{ color: crab.textColor, opacity: 0.4 }}>
-          Powered by $CMEM
-        </p>
-      </footer>
     </div>
   );
 }

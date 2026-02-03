@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
 
 export interface PostGridItem {
   id: string;
@@ -16,91 +15,51 @@ export interface PostGridItem {
 
 interface PostGridProps {
   posts: PostGridItem[];
-  accentColor?: string;
-  textColor?: string;
 }
 
-export default function PostGrid({ 
-  posts, 
-  accentColor = '#FF00FF',
-  textColor = '#00FF00' 
-}: PostGridProps) {
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
-
+export default function PostGrid({ posts }: PostGridProps) {
   if (posts.length === 0) {
     return (
-      <div 
-        className="text-center py-16 border-2 border-dashed"
-        style={{ borderColor: accentColor, color: textColor }}
-      >
+      <div className="text-center py-20">
         <div className="text-6xl mb-4">📷</div>
-        <p className="text-xl">No posts yet!</p>
-        <p className="opacity-70 mt-2">Be the first to share a photo</p>
+        <p className="text-xl text-white">No posts yet</p>
+        <p className="text-zinc-500 mt-2">Be the first to share something</p>
+        <Link 
+          href="/create" 
+          className="inline-block mt-6 px-6 py-2 bg-orange-500 text-black font-semibold rounded-full hover:bg-orange-400 transition"
+        >
+          Create Post
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1 md:gap-2">
+    <div className="grid grid-cols-3 gap-0.5">
       {posts.map((post) => (
         <Link
           key={post.id}
           href={`/post/${post.id}`}
-          className="relative aspect-square block overflow-hidden border-2 transition-all duration-200"
-          style={{ 
-            borderColor: hoveredId === post.id ? accentColor : 'transparent',
-            transform: hoveredId === post.id ? 'scale(1.02)' : 'scale(1)',
-          }}
-          onMouseEnter={() => setHoveredId(post.id)}
-          onMouseLeave={() => setHoveredId(null)}
+          className="relative aspect-square overflow-hidden group"
         >
-          {/* Image */}
           <img
             src={post.imageUrl}
-            alt={post.caption || 'Post image'}
+            alt={post.caption || 'Post'}
             className="w-full h-full object-cover"
             loading="lazy"
           />
           
-          {/* Hover overlay with stats */}
-          <div 
-            className="absolute inset-0 flex items-center justify-center gap-4 transition-opacity duration-200"
-            style={{ 
-              backgroundColor: 'rgba(0,0,0,0.7)',
-              opacity: hoveredId === post.id ? 1 : 0,
-            }}
-          >
-            <div className="flex items-center gap-1 text-white font-bold">
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-6">
+            <div className="flex items-center gap-1.5 text-white font-semibold">
               <span>❤️</span>
               <span>{post.likeCount}</span>
             </div>
-            <div className="flex items-center gap-1 text-white font-bold">
+            <div className="flex items-center gap-1.5 text-white font-semibold">
               <span>💬</span>
               <span>{post.commentCount}</span>
             </div>
           </div>
-
-          {/* Author badge on hover */}
-          {hoveredId === post.id && (
-            <div 
-              className="absolute bottom-2 left-2 right-2 flex items-center gap-2 p-2 rounded"
-              style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
-            >
-              <div 
-                className="w-6 h-6 rounded-full border flex items-center justify-center text-xs overflow-hidden"
-                style={{ borderColor: accentColor }}
-              >
-                {post.avatarUrl ? (
-                  <img src={post.avatarUrl} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  '🦀'
-                )}
-              </div>
-              <span className="text-xs truncate" style={{ color: textColor }}>
-                @{post.username}
-              </span>
-            </div>
-          )}
         </Link>
       ))}
     </div>

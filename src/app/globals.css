@@ -1,146 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #000000;
+  --foreground: #ffffff;
+  --accent: #f97316;
+  --muted: #a1a1aa;
+  --border: #27272a;
+  --card: #18181b;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* MySpace-style animations */
-@keyframes glitter {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-@keyframes sparkle {
-  0%, 100% { 
-    text-shadow: 0 0 5px #FF00FF, 0 0 10px #00FF00, 0 0 15px #FF00FF;
-  }
-  50% { 
-    text-shadow: 0 0 10px #00FF00, 0 0 20px #FF00FF, 0 0 30px #00FF00;
-  }
-}
-
-@keyframes rainbow {
-  0% { filter: hue-rotate(0deg); }
-  100% { filter: hue-rotate(360deg); }
-}
-
-@keyframes blink {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
-}
-
-@keyframes marquee {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
-}
-
-@keyframes sparkle-anim {
-  0%, 100% { 
-    opacity: 0;
-    transform: scale(0) rotate(0deg);
-  }
-  50% { 
-    opacity: 1;
-    transform: scale(1) rotate(180deg);
-  }
-}
-
-@keyframes twinkle {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.8); }
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-.animate-sparkle {
-  animation: sparkle-anim 2s ease-in-out infinite;
-}
-
-.animate-twinkle {
-  animation: twinkle 1s ease-in-out infinite;
-}
-
-.animate-shimmer {
-  animation: shimmer 2s ease-in-out infinite;
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.glitter {
-  animation: glitter 1s ease-in-out infinite;
-}
-
-.sparkle {
-  animation: sparkle 2s ease-in-out infinite;
-}
-
-.rainbow {
-  animation: rainbow 3s linear infinite;
-}
-
-.blink {
-  animation: blink 1s step-end infinite;
-}
-
-.animate-marquee {
-  animation: marquee 25s linear infinite;
-}
-
-.pixelated {
-  image-rendering: pixelated;
-}
-
-/* Scrollbar styling */
+/* Subtle scrollbar */
 ::-webkit-scrollbar {
-  width: 12px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #000040;
+  background: var(--background);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #FF00FF;
-  border: 2px solid #00FF00;
+  background: var(--border);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #CC00CC;
+  background: var(--muted);
 }
 
-/* Selection styling */
+/* Selection */
 ::selection {
-  background: #FF00FF;
-  color: #000080;
+  background: var(--accent);
+  color: var(--background);
 }

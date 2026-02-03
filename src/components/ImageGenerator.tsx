@@ -2,49 +2,34 @@
 
 import { useState } from 'react';
 
-const IMAGE_COST = 5; // CMEM per generation
+const IMAGE_COST = 5;
 
 interface ImageGeneratorProps {
-  apiKey?: string;
-  balance?: number;
-  onImageGenerated?: (imageUrl: string, prompt: string) => void;
-  onBalanceChange?: (newBalance: number) => void;
-  compact?: boolean; // Compact mode for embedding in other components
-}
-
-interface GenerateResult {
-  success: boolean;
-  imageUrl?: string;
-  prompt?: string;
-  cmemSpent?: number;
-  newBalance?: number;
-  error?: string;
-  needsWallet?: boolean;
-  balance?: number;
-  required?: number;
+  apiKey: string;
+  balance: number;
+  onImageGenerated: (imageUrl: string, prompt: string) => void;
+  onBalanceChange: (newBalance: number) => void;
+  compact?: boolean;
 }
 
 export default function ImageGenerator({
   apiKey,
-  balance = 0,
+  balance,
   onImageGenerated,
   onBalanceChange,
   compact = false,
 }: ImageGeneratorProps) {
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [localBalance, setLocalBalance] = useState(balance);
 
-  const canGenerate = apiKey && localBalance >= IMAGE_COST && prompt.trim().length > 0;
+  const canGenerate = balance >= IMAGE_COST && prompt.trim().length > 0;
 
   const handleGenerate = async () => {
     if (!canGenerate) return;
 
     setIsGenerating(true);
     setError(null);
-    setGeneratedImage(null);
 
     try {
       const response = await fetch('/api/generate', {
@@ -56,19 +41,12 @@ export default function ImageGenerator({
         body: JSON.stringify({ prompt: prompt.trim() }),
       });
 
-      const data: GenerateResult = await response.json();
+      const data = await response.json();
 
-      if (response.ok && data.success && data.imageUrl) {
-        setGeneratedImage(data.imageUrl);
-        
-        // Update balance
-        if (data.newBalance !== undefined) {
-          setLocalBalance(data.newBalance);
-          onBalanceChange?.(data.newBalance);
-        }
-
-        // Notify parent
-        onImageGenerated?.(data.imageUrl, prompt.trim());
+      if (response.ok && data.success) {
+        onImageGenerated(data.imageUrl, prompt.trim());
+        onBalanceChange(data.newBalance);
+        setPrompt('');
       } else {
         setError(data.error || 'Failed to generate image');
       }
@@ -80,183 +58,62 @@ export default function ImageGenerator({
     }
   };
 
-  const handleClear = () => {
-    setGeneratedImage(null);
-    setPrompt('');
-    setError(null);
-  };
-
-  // Update local balance when prop changes
-  if (balance !== localBalance && !isGenerating) {
-    setLocalBalance(balance);
-  }
-
-  if (!apiKey) {
-    return (
-      <div 
-        className={`p-4 border-2 border-dashed text-center ${compact ? '' : 'p-6'}`}
-        style={{ borderColor: '#FF00FF44', color: '#00FF00', opacity: 0.7 }}
-      >
-        <p>🦀 Login to generate images!</p>
-      </div>
-    );
-  }
-
   return (
-    <div className={`space-y-4 ${compact ? '' : 'p-4'}`}>
-      {/* Balance Display */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span style={{ color: '#FF00FF' }}>💰</span>
-          <span style={{ color: '#00FF00' }}>
-            Balance: <strong>{localBalance.toFixed(2)}</strong> $CMEM
-          </span>
-        </div>
-        <div 
-          className="px-2 py-1 text-xs"
-          style={{ 
-            backgroundColor: localBalance >= IMAGE_COST ? '#00FF0022' : '#FF000022',
-            color: localBalance >= IMAGE_COST ? '#00FF00' : '#FF6B6B',
-            border: `1px solid ${localBalance >= IMAGE_COST ? '#00FF00' : '#FF6B6B'}`,
-          }}
-        >
-          Cost: {IMAGE_COST} CMEM
-        </div>
+    <div className="space-y-4">
+      {/* Cost info */}
+      <div className="flex justify-between items-center text-sm">
+        <span className="text-zinc-500">Generation cost</span>
+        <span className={balance >= IMAGE_COST ? 'text-orange-500' : 'text-red-500'}>
+          {IMAGE_COST} $CMEM
+        </span>
       </div>
 
-      {/* Prompt Input */}
-      <div className="relative">
+      {/* Prompt input */}
+      <div>
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Describe your image... 🎨"
-          rows={compact ? 2 : 3}
+          placeholder="Describe the image you want to create..."
+          className="w-full p-4 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:border-orange-500 resize-none"
+          rows={compact ? 2 : 4}
           maxLength={1000}
           disabled={isGenerating}
-          className="w-full p-3 border-2 resize-none focus:outline-none transition-colors"
-          style={{ 
-            backgroundColor: 'rgba(0,0,0,0.3)',
-            borderColor: '#FF00FF',
-            color: '#00FF00',
-          }}
         />
-        <div 
-          className="absolute bottom-2 right-2 text-xs"
-          style={{ color: '#00FF00', opacity: 0.5 }}
-        >
-          {prompt.length}/1000
-        </div>
+        <p className="text-xs text-zinc-600 mt-1 text-right">{prompt.length}/1000</p>
       </div>
 
-      {/* Generate Button */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={handleGenerate}
-          disabled={!canGenerate || isGenerating}
-          className={`
-            px-4 py-2 border-2 font-bold transition-all flex items-center gap-2
-            ${isGenerating ? 'opacity-50 cursor-wait' : ''}
-            ${!canGenerate ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}
-          `}
-          style={{ 
-            borderColor: '#FF00FF',
-            color: '#FF00FF',
-            backgroundColor: 'rgba(255,0,255,0.1)',
-          }}
-        >
-          {isGenerating ? (
-            <>
-              <span className="animate-spin">⏳</span>
-              Generating...
-            </>
-          ) : (
-            <>
-              <span>🎨</span>
-              Generate ({IMAGE_COST} CMEM)
-            </>
-          )}
-        </button>
-
-        {generatedImage && (
-          <button
-            onClick={handleClear}
-            className="px-3 py-2 border-2 text-sm hover:scale-105 transition-all"
-            style={{ 
-              borderColor: '#00FF00',
-              color: '#00FF00',
-              backgroundColor: 'transparent',
-            }}
-          >
-            Clear
-          </button>
-        )}
-      </div>
-
-      {/* Insufficient Balance Warning */}
-      {localBalance < IMAGE_COST && (
-        <div 
-          className="p-3 text-sm"
-          style={{ 
-            backgroundColor: 'rgba(255,107,107,0.1)',
-            color: '#FF6B6B',
-            border: '1px solid #FF6B6B',
-          }}
-        >
-          ⚠️ Insufficient balance. Need {IMAGE_COST} $CMEM to generate.
-          <br />
-          <span className="text-xs opacity-80">
-            Tip: Engage with other crabs' posts to earn CMEM!
-          </span>
-        </div>
-      )}
-
-      {/* Error Display */}
+      {/* Error */}
       {error && (
-        <div 
-          className="p-3 text-sm"
-          style={{ 
-            backgroundColor: 'rgba(255,107,107,0.1)',
-            color: '#FF6B6B',
-            border: '1px solid #FF6B6B',
-          }}
-        >
-          ❌ {error}
-        </div>
+        <p className="text-red-500 text-sm">{error}</p>
       )}
 
-      {/* Generated Image Preview */}
-      {generatedImage && (
-        <div 
-          className="border-2 overflow-hidden"
-          style={{ borderColor: '#00FF00' }}
-        >
-          <img
-            src={generatedImage}
-            alt="Generated image"
-            className="w-full object-contain max-h-[400px] bg-black"
-          />
-          <div 
-            className="p-2 text-xs text-center"
-            style={{ backgroundColor: 'rgba(0,255,0,0.1)', color: '#00FF00' }}
-          >
-            ✨ Image generated! Ready to post.
-          </div>
-        </div>
-      )}
+      {/* Generate button */}
+      <button
+        onClick={handleGenerate}
+        disabled={!canGenerate || isGenerating}
+        className="w-full py-3 bg-orange-500 text-black font-semibold rounded-lg hover:bg-orange-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isGenerating ? (
+          <span className="flex items-center justify-center gap-2">
+            <span className="animate-spin">⏳</span>
+            Generating...
+          </span>
+        ) : balance < IMAGE_COST ? (
+          `Need ${IMAGE_COST} $CMEM`
+        ) : (
+          `Generate (${IMAGE_COST} $CMEM)`
+        )}
+      </button>
 
-      {/* Loading Animation */}
-      {isGenerating && (
-        <div 
-          className="p-6 text-center border-2 border-dashed"
-          style={{ borderColor: '#FF00FF' }}
-        >
-          <div className="text-4xl mb-2 animate-bounce">🎨</div>
-          <p style={{ color: '#FF00FF' }} className="animate-pulse">
-            Generating your masterpiece...
-          </p>
-          <p className="text-xs mt-2" style={{ color: '#00FF00', opacity: 0.6 }}>
-            This may take 30-60 seconds
-          </p>
+      {/* Tips */}
+      {!compact && (
+        <div className="text-xs text-zinc-600 space-y-1">
+          <p>Tips for better results:</p>
+          <ul className="list-disc list-inside space-y-0.5 text-zinc-700">
+            <li>Be specific about style and mood</li>
+            <li>Mention colors, lighting, composition</li>
+            <li>Try "digital art", "photograph", "illustration"</li>
+          </ul>
         </div>
       )}
     </div>

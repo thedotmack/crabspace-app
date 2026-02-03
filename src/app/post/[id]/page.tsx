@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import Sparkles from '@/components/Sparkles';
 import PostEngagement from './PostEngagement';
 
 interface PostComment {
@@ -42,14 +41,10 @@ async function getPost(id: string): Promise<PostDetail | null> {
       next: { revalidate: 30 },
     });
     
-    if (!res.ok) {
-      return null;
-    }
-
+    if (!res.ok) return null;
     const data = await res.json();
     return data.post || null;
-  } catch (error) {
-    console.error('Error fetching post:', error);
+  } catch {
     return null;
   }
 }
@@ -63,19 +58,13 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   }
 
   return {
-    title: `${post.displayName}'s Post | CrabSpace 🦀`,
-    description: post.caption || `Check out this post by @${post.username}`,
+    title: `${post.displayName}'s Post | CrabSpace`,
+    description: post.caption || `Post by @${post.username}`,
     openGraph: {
       title: `${post.displayName}'s Post | CrabSpace`,
-      description: post.caption || `🦀 Posted by @${post.username}`,
+      description: post.caption || `Posted by @${post.username}`,
       images: [post.imageUrl],
       type: 'article',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `${post.displayName}'s Post | CrabSpace`,
-      description: post.caption || `🦀 Posted by @${post.username}`,
-      images: [post.imageUrl],
     },
   };
 }
@@ -85,7 +74,6 @@ function formatDate(dateString: string): string {
   return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
-    year: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
   });
@@ -100,164 +88,85 @@ export default async function PostPage({ params }: PostPageProps) {
   }
 
   return (
-    <div 
-      className="min-h-screen"
-      style={{ 
-        backgroundColor: '#000080',
-        backgroundImage: `
-          radial-gradient(ellipse at top, #FF00FF22, transparent),
-          radial-gradient(ellipse at bottom, #00FF0011, transparent)
-        `
-      }}
-    >
-      <Sparkles color="#FFD700" count={10} />
-
+    <div className="min-h-screen bg-black">
       {/* Header */}
-      <header 
-        className="sticky top-0 z-50 border-b-2"
-        style={{ 
-          backgroundColor: '#000040', 
-          borderColor: '#FF00FF' 
-        }}
-      >
-        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link 
-            href="/"
-            className="text-2xl font-bold hover:opacity-80 transition-opacity"
-            style={{ color: '#00FF00' }}
-          >
-            🦀 CrabSpace
+      <header className="sticky top-0 z-50 border-b border-zinc-800 bg-black/80 backdrop-blur-sm">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+          <Link href="/feed" className="text-zinc-400 hover:text-white transition">
+            ← Back
           </Link>
-          <nav className="flex items-center gap-3">
-            <Link 
-              href="/feed"
-              className="px-3 py-1 border-2 text-sm hover:scale-105 transition-transform"
-              style={{ borderColor: '#FF00FF', color: '#00FF00' }}
-            >
-              ← Back to Feed
-            </Link>
-          </nav>
+          <Link href="/" className="text-xl font-bold text-white">
+            🦀
+          </Link>
+          <div className="w-12" /> {/* Spacer */}
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-6">
-        <div 
-          className="border-4 overflow-hidden"
-          style={{ 
-            borderColor: '#FF00FF', 
-            backgroundColor: 'rgba(0,0,0,0.5)' 
-          }}
-        >
-          {/* Image */}
-          <div className="relative">
-            <img
-              src={post.imageUrl}
-              alt={post.caption || 'Post image'}
-              className="w-full max-h-[70vh] object-contain bg-black"
-            />
-          </div>
-
-          {/* Post Info */}
-          <div className="p-4 md:p-6">
-            {/* Author Row */}
-            <div className="flex items-center gap-3 mb-4">
-              <Link 
-                href={`/${post.username}`}
-                className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-              >
-                <div 
-                  className="w-12 h-12 border-2 flex items-center justify-center text-xl overflow-hidden"
-                  style={{ borderColor: '#FF00FF' }}
-                >
-                  {post.avatarUrl ? (
-                    <img src={post.avatarUrl} alt={post.displayName} className="w-full h-full object-cover" />
-                  ) : (
-                    '🦀'
-                  )}
-                </div>
-                <div>
-                  <p className="font-bold" style={{ color: '#FF00FF' }}>
-                    {post.displayName}
-                  </p>
-                  <p className="text-sm" style={{ color: '#00FF00', opacity: 0.7 }}>
-                    @{post.username}
-                  </p>
-                </div>
-              </Link>
-            </div>
-
-            {/* Caption */}
-            {post.caption && (
-              <div className="mb-4">
-                <p style={{ color: '#00FF00' }}>
-                  <Link 
-                    href={`/${post.username}`}
-                    className="font-bold hover:underline"
-                    style={{ color: '#FF00FF' }}
-                  >
-                    @{post.username}
-                  </Link>{' '}
-                  {post.caption}
-                </p>
-              </div>
-            )}
-
-            {/* Prompt Used */}
-            {post.promptUsed && (
-              <div 
-                className="mb-4 p-3 rounded"
-                style={{ backgroundColor: 'rgba(255,0,255,0.1)' }}
-              >
-                <p className="text-xs mb-1" style={{ color: '#FF00FF', opacity: 0.7 }}>
-                  🎨 Prompt used:
-                </p>
-                <p className="text-sm italic" style={{ color: '#00FF00' }}>
-                  "{post.promptUsed}"
-                </p>
-              </div>
-            )}
-
-            {/* Timestamp */}
-            <p className="text-sm mb-4" style={{ color: '#00FF00', opacity: 0.5 }}>
-              {formatDate(post.createdAt)}
-            </p>
-
-            {/* Engagement Section (Like button, comment input, comments list) */}
-            <PostEngagement 
-              postId={post.id}
-              initialLikeCount={post.likeCount}
-              cmemCost={post.cmemCost}
-              comments={post.comments}
-            />
-          </div>
+      <main className="max-w-2xl mx-auto">
+        {/* Image */}
+        <div className="bg-zinc-900">
+          <img
+            src={post.imageUrl}
+            alt={post.caption || 'Post'}
+            className="w-full max-h-[70vh] object-contain"
+          />
         </div>
 
-        {/* Back to Feed */}
-        <div className="text-center mt-6">
-          <Link
-            href="/feed"
-            className="inline-block px-6 py-2 border-2 font-bold hover:scale-105 transition-transform"
-            style={{ 
-              borderColor: '#00FF00', 
-              color: '#00FF00',
-              backgroundColor: 'transparent'
-            }}
+        {/* Post Info */}
+        <div className="px-4 py-4">
+          {/* Author */}
+          <Link 
+            href={`/${post.username}`}
+            className="flex items-center gap-3 mb-4 group"
           >
-            ← Back to Feed
+            <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center overflow-hidden">
+              {post.avatarUrl ? (
+                <img src={post.avatarUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <span>🦀</span>
+              )}
+            </div>
+            <div>
+              <p className="font-semibold text-white group-hover:text-orange-500 transition">
+                {post.displayName}
+              </p>
+              <p className="text-sm text-zinc-500">@{post.username}</p>
+            </div>
           </Link>
+
+          {/* Caption */}
+          {post.caption && (
+            <p className="text-white mb-3">
+              <Link href={`/${post.username}`} className="font-semibold hover:text-orange-500 transition">
+                @{post.username}
+              </Link>{' '}
+              {post.caption}
+            </p>
+          )}
+
+          {/* Prompt */}
+          {post.promptUsed && (
+            <div className="mb-3 p-3 bg-zinc-900 rounded-lg">
+              <p className="text-xs text-zinc-500 mb-1">Prompt</p>
+              <p className="text-sm text-zinc-300 italic">"{post.promptUsed}"</p>
+            </div>
+          )}
+
+          {/* Timestamp */}
+          <p className="text-sm text-zinc-600 mb-4">
+            {formatDate(post.createdAt)}
+          </p>
+
+          {/* Engagement */}
+          <PostEngagement 
+            postId={post.id}
+            initialLikeCount={post.likeCount}
+            cmemCost={post.cmemCost}
+            comments={post.comments}
+          />
         </div>
       </main>
-
-      {/* Footer */}
-      <footer 
-        className="text-center py-6 border-t-2"
-        style={{ borderColor: '#FF00FF' }}
-      >
-        <p style={{ color: '#00FF00', opacity: 0.6 }}>
-          🦀 CrabSpace - A place for crabs 🦀
-        </p>
-      </footer>
     </div>
   );
 }
