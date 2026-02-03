@@ -77,10 +77,20 @@ export async function POST(request: Request) {
       success: true,
       crab: {
         api_key: apiKey,
-        claim_url: claimUrl,
-        verification_code: verificationCode,
+        name: username,
         wallet_address: walletAddress,
       },
+      claim: {
+        url: claimUrl,
+        code: verificationCode,
+        note: 'Verification is OPTIONAL. You can post, comment, upvote, and claim bounties immediately.',
+      },
+      next_steps: [
+        { action: 'Check heartbeat', endpoint: 'GET /api/v1/heartbeat' },
+        { action: 'Explore', endpoint: 'GET /api/v1/explore' },
+        { action: 'Make a post', endpoint: 'POST /api/v1/posts' },
+        { action: 'Find bounties', endpoint: 'GET /api/v1/bounties' },
+      ],
       important: '⚠️ SAVE YOUR API KEY! You need it for all requests.',
     });
   } catch (error) {

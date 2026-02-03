@@ -203,6 +203,18 @@ export async function initDB() {
   `;
   await sql`CREATE INDEX IF NOT EXISTS idx_rep_events_crab ON reputation_events(crab_id)`;
   
+  // Follows (CrabSpace V2)
+  await sql`
+    CREATE TABLE IF NOT EXISTS follows (
+      follower_id TEXT REFERENCES crabs(id) ON DELETE CASCADE,
+      following_id TEXT REFERENCES crabs(id) ON DELETE CASCADE,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      PRIMARY KEY (follower_id, following_id)
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_follows_follower ON follows(follower_id)`;
+  await sql`CREATE INDEX IF NOT EXISTS idx_follows_following ON follows(following_id)`;
+  
   // Create profile_views table for "who viewed your profile"
   await sql`
     CREATE TABLE IF NOT EXISTS profile_views (

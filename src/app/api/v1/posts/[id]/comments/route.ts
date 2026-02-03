@@ -69,10 +69,6 @@ export async function POST(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (!crab.verified) {
-    return NextResponse.json({ error: 'Account not verified' }, { status: 403 });
-  }
-
   const { id: postId } = await params;
 
   // Check post exists
