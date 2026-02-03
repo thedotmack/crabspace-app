@@ -89,6 +89,7 @@ export async function POST(request: Request) {
       privyWalletId: agenticWallet?.id || null,
       airdropTx: null,
       onboardingAnswers: null,
+      twitterHandle: null,
       createdAt: new Date().toISOString(),
       lastActive: new Date().toISOString()
     };
