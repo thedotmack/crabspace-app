@@ -146,8 +146,7 @@ export async function initDB() {
     )
   `;
   
-  // Add club_id to posts for club-scoped posts
-  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS club_id TEXT REFERENCES clubs(id)`;
+  // Note: club_id column added to posts table after posts table creation (see below)
   
   // Projects (CrabSpace V2)
   await sql`
@@ -240,6 +239,9 @@ export async function initDB() {
   `;
   await sql`CREATE INDEX IF NOT EXISTS idx_posts_crab_id ON posts(crab_id)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at DESC)`;
+  
+  // Add club_id to posts for club-scoped posts (CrabSpace V2)
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS club_id TEXT`;
 
   await sql`
     CREATE TABLE IF NOT EXISTS engagements (
