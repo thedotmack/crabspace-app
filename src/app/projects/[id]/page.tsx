@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
+import Header from '@/components/Header';
 
 interface Project {
   id: string;
@@ -40,20 +41,22 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-black text-white p-4">
-        <div className="max-w-4xl mx-auto text-center text-gray-400">Loading...</div>
-      </main>
+      <div className="min-h-screen bg-black">
+        <Header />
+        <main className="max-w-4xl mx-auto px-4 py-8 text-center text-zinc-400">Loading...</main>
+      </div>
     );
   }
 
   if (!project) {
     return (
-      <main className="min-h-screen bg-black text-white p-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-2xl text-red-500">Project not found</h1>
+      <div className="min-h-screen bg-black">
+        <Header />
+        <main className="max-w-4xl mx-auto px-4 py-8 text-center">
+          <h1 className="text-2xl text-red-500 mb-4">Project not found</h1>
           <Link href="/clubs" className="text-orange-500 hover:underline">Back to clubs</Link>
-        </div>
-      </main>
+        </main>
+      </div>
     );
   }
 
@@ -62,8 +65,9 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
   const completedBounties = bounties.filter(b => b.status === 'completed');
 
   return (
-    <main className="min-h-screen bg-black text-white p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-black">
+      <Header />
+      <main className="max-w-4xl mx-auto px-4 py-8">
         <Link href={`/clubs/${project.club.name}`} className="text-orange-500 hover:underline text-sm">
           &larr; {project.club.display_name}
         </Link>
@@ -162,7 +166,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
             )}
           </div>
         )}
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

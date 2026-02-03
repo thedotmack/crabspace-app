@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Header from '@/components/Header';
 
 interface Observation {
   id: number;
@@ -15,289 +16,130 @@ interface Observation {
   project: string;
 }
 
-// Type colors matching claude-mem
-const typeColors: Record<string, { bg: string; border: string; emoji: string }> = {
-  feature: { bg: '#00FF0022', border: '#00FF00', emoji: '✅' },
-  discovery: { bg: '#0088FF22', border: '#0088FF', emoji: '🔵' },
-  change: { bg: '#FF880022', border: '#FF8800', emoji: '🔄' },
-  decision: { bg: '#FF00FF22', border: '#FF00FF', emoji: '⚖️' },
-  bug: { bg: '#FF000022', border: '#FF0000', emoji: '🔴' },
-  note: { bg: '#88888822', border: '#888888', emoji: '📝' },
+const typeColors: Record<string, { bg: string; text: string; emoji: string }> = {
+  feature: { bg: 'bg-green-500/10', text: 'text-green-400', emoji: '✅' },
+  discovery: { bg: 'bg-blue-500/10', text: 'text-blue-400', emoji: '🔵' },
+  change: { bg: 'bg-orange-500/10', text: 'text-orange-400', emoji: '🔄' },
+  decision: { bg: 'bg-purple-500/10', text: 'text-purple-400', emoji: '⚖️' },
+  bug: { bg: 'bg-red-500/10', text: 'text-red-400', emoji: '🐛' },
+  note: { bg: 'bg-zinc-500/10', text: 'text-zinc-400', emoji: '📝' },
 };
 
 export default function MemoryPage() {
   const [observations, setObservations] = useState<Observation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-
-  const fetchObservations = async () => {
-    try {
-      // Try local claude-mem first, then fallback to public endpoint
-      const endpoints = [
-        '/api/memory', // Proxy endpoint we'll create
-        'http://localhost:37777/api/observations',
-      ];
-      
-      let data = null;
-      for (const endpoint of endpoints) {
-        try {
-          const res = await fetch(endpoint, { 
-            cache: 'no-store',
-            signal: AbortSignal.timeout(5000)
-          });
-          if (res.ok) {
-            data = await res.json();
-            break;
-          }
-        } catch {
-          continue;
-        }
-      }
-      
-      if (data?.items) {
-        setObservations(data.items);
-        setLastUpdate(new Date());
-        setError('');
-      } else {
-        throw new Error('No observations found');
-      }
-    } catch (err) {
-      setError('Unable to connect to claude-mem');
-      console.error('Memory fetch error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [filter, setFilter] = useState<string>('all');
 
   useEffect(() => {
-    fetchObservations();
-    // Poll every 10 seconds
-    const interval = setInterval(fetchObservations, 10000);
-    return () => clearInterval(interval);
+    fetch('/api/memory')
+      .then(res => res.json())
+      .then(data => {
+        setObservations(data.observations || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
   }, []);
 
-  const formatTime = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true 
-    });
-  };
+  const filteredObservations = filter === 'all' 
+    ? observations 
+    : observations.filter(o => o.type === filter);
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
-
-  const getTypeStyle = (type: string) => {
-    return typeColors[type] || typeColors.note;
-  };
-
-  const parseFacts = (factsStr: string): string[] => {
-    try {
-      return JSON.parse(factsStr);
-    } catch {
-      return [];
-    }
-  };
+  const types = ['all', ...new Set(observations.map(o => o.type))];
 
   return (
-    <div 
-      className="min-h-screen p-4"
-      style={{ 
-        backgroundColor: '#0a0a1a',
-        backgroundImage: `
-          radial-gradient(ellipse at top, #FF00FF11, transparent),
-          radial-gradient(ellipse at bottom, #00FF0008, transparent)
-        `
-      }}
-    >
-      {/* Header */}
-      <header className="max-w-4xl mx-auto mb-6 flex items-center justify-between">
-        <Link 
-          href="/"
-          className="text-2xl font-bold hover:opacity-80 transition-opacity"
-          style={{ color: '#FF00FF' }}
-        >
-          🦀 CrabSpace
-        </Link>
-        <div className="flex items-center gap-4">
-          <div 
-            className="flex items-center gap-2 px-4 py-2 rounded-full"
-            style={{ backgroundColor: '#1a1a3e', border: '2px solid #FF00FF' }}
-          >
-            <img 
-              src="https://claude-mem.ai/logo.png" 
-              alt="claude-mem" 
-              className="w-6 h-6"
-              onError={(e) => { e.currentTarget.src = ''; e.currentTarget.alt = '🧠'; }}
-            />
-            <span style={{ color: '#00FF00' }} className="font-bold">Memory</span>
+    <div className="min-h-screen bg-black">
+      <Header />
+
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+              <span>🧠</span> Memory
+            </h1>
+            <p className="text-zinc-500 mt-1">Observations from claude-mem</p>
           </div>
+          <a 
+            href="https://claude-mem.ai" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-zinc-500 hover:text-orange-500 text-sm transition"
+          >
+            claude-mem.ai →
+          </a>
         </div>
-      </header>
 
-      {/* Title */}
-      <div className="max-w-4xl mx-auto mb-6 text-center">
-        <h1 
-          className="text-4xl font-bold mb-2"
-          style={{ 
-            color: '#00FF00',
-            fontFamily: 'Impact, sans-serif',
-            textShadow: '2px 2px 0 #FF00FF'
-          }}
-        >
-          🧠 Memory Feed
-        </h1>
-        <p style={{ color: '#888' }}>
-          Live observations from claude-mem
-          {lastUpdate && (
-            <span className="ml-2">
-              • Updated {lastUpdate.toLocaleTimeString()}
-            </span>
-          )}
-        </p>
-      </div>
+        {/* Filters */}
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {types.map(type => (
+            <button
+              key={type}
+              onClick={() => setFilter(type)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+                filter === type 
+                  ? 'bg-orange-500 text-black' 
+                  : 'bg-zinc-900 text-zinc-400 hover:text-white'
+              }`}
+            >
+              {type === 'all' ? 'All' : `${typeColors[type]?.emoji || '•'} ${type}`}
+            </button>
+          ))}
+        </div>
 
-      {/* Content */}
-      <div className="max-w-4xl mx-auto">
+        {/* Observations */}
         {loading ? (
-          <div 
-            className="text-center p-8 rounded-lg border-2"
-            style={{ borderColor: '#FF00FF', backgroundColor: '#1a1a3e' }}
-          >
-            <div className="text-4xl mb-4 animate-pulse">🧠</div>
-            <p style={{ color: '#00FF00' }}>Loading memories...</p>
-          </div>
-        ) : error ? (
-          <div 
-            className="text-center p-8 rounded-lg border-2"
-            style={{ borderColor: '#FF0000', backgroundColor: '#1a1a3e' }}
-          >
-            <div className="text-4xl mb-4">❌</div>
-            <p style={{ color: '#FF0000' }}>{error}</p>
-            <p className="text-sm mt-2" style={{ color: '#888' }}>
-              Make sure claude-mem is running on port 37777
-            </p>
+          <div className="text-center py-20 text-zinc-500">Loading...</div>
+        ) : filteredObservations.length === 0 ? (
+          <div className="text-center py-20 bg-zinc-900/50 border border-zinc-800 rounded-xl">
+            <div className="text-4xl mb-3">🧠</div>
+            <p className="text-zinc-400">No observations yet</p>
           </div>
         ) : (
           <div className="space-y-4">
-            {observations.map((obs) => {
-              const style = getTypeStyle(obs.type);
-              const facts = parseFacts(obs.facts);
-              
+            {filteredObservations.map(obs => {
+              const colors = typeColors[obs.type] || typeColors.note;
               return (
                 <div 
                   key={obs.id}
-                  className="p-4 rounded-lg border-2 transition-all hover:scale-[1.01]"
-                  style={{ 
-                    backgroundColor: style.bg,
-                    borderColor: style.border
-                  }}
+                  className={`${colors.bg} border border-zinc-800 rounded-xl p-5`}
                 >
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">{style.emoji}</span>
-                      <span 
-                        className="text-xs px-2 py-1 rounded uppercase font-bold"
-                        style={{ 
-                          backgroundColor: style.border + '33',
-                          color: style.border
-                        }}
-                      >
-                        {obs.type}
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div>
+                      <span className={`text-xs font-medium ${colors.text} uppercase tracking-wide`}>
+                        {colors.emoji} {obs.type}
                       </span>
+                      <h3 className="text-lg font-bold text-white mt-1">{obs.title}</h3>
+                      {obs.subtitle && (
+                        <p className="text-zinc-500 text-sm">{obs.subtitle}</p>
+                      )}
                     </div>
-                    <div className="text-xs" style={{ color: '#888' }}>
-                      {formatDate(obs.created_at)} • {formatTime(obs.created_at)}
-                    </div>
+                    <span className="text-zinc-600 text-xs whitespace-nowrap">
+                      {new Date(obs.created_at).toLocaleDateString()}
+                    </span>
                   </div>
                   
-                  {/* Title */}
-                  <h3 
-                    className="text-lg font-bold mb-1"
-                    style={{ color: '#00FF00' }}
-                  >
-                    {obs.title}
-                  </h3>
-                  
-                  {/* Subtitle */}
-                  {obs.subtitle && (
-                    <p className="text-sm mb-2" style={{ color: '#aaa' }}>
-                      {obs.subtitle}
-                    </p>
+                  {obs.narrative && (
+                    <p className="text-zinc-300 text-sm mb-3">{obs.narrative}</p>
                   )}
                   
-                  {/* Narrative */}
-                  <p className="text-sm mb-3" style={{ color: '#ddd' }}>
-                    {obs.narrative}
-                  </p>
-                  
-                  {/* Facts */}
-                  {facts.length > 0 && (
-                    <div 
-                      className="p-3 rounded mt-2"
-                      style={{ backgroundColor: '#00000044' }}
-                    >
-                      <p className="text-xs font-bold mb-2" style={{ color: '#FF00FF' }}>
-                        📋 Facts
-                      </p>
-                      <ul className="text-xs space-y-1" style={{ color: '#ccc' }}>
-                        {facts.map((fact, i) => (
-                          <li key={i} className="flex gap-2">
-                            <span style={{ color: '#00FF00' }}>•</span>
-                            <span>{fact}</span>
-                          </li>
-                        ))}
-                      </ul>
+                  {obs.facts && (
+                    <div className="text-zinc-500 text-xs">
+                      <span className="text-zinc-600 font-medium">Facts:</span> {obs.facts}
                     </div>
                   )}
                   
-                  {/* Meta */}
-                  <div className="flex gap-4 mt-3 text-xs" style={{ color: '#666' }}>
-                    <span>ID: #{obs.id}</span>
-                    <span>Project: {obs.project}</span>
-                  </div>
+                  {obs.project && (
+                    <div className="mt-3 pt-3 border-t border-zinc-800/50">
+                      <span className="text-zinc-600 text-xs">Project: {obs.project}</span>
+                    </div>
+                  )}
                 </div>
               );
             })}
-            
-            {observations.length === 0 && (
-              <div 
-                className="text-center p-8 rounded-lg border-2"
-                style={{ borderColor: '#888', backgroundColor: '#1a1a3e' }}
-              >
-                <div className="text-4xl mb-4">📭</div>
-                <p style={{ color: '#888' }}>No observations yet</p>
-              </div>
-            )}
           </div>
         )}
-      </div>
-
-      {/* Footer */}
-      <footer className="max-w-4xl mx-auto mt-8 text-center py-4">
-        <p className="text-sm" style={{ color: '#666' }}>
-          Powered by{' '}
-          <a 
-            href="https://github.com/thedotmack/claude-mem" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            style={{ color: '#FF00FF' }}
-            className="hover:underline"
-          >
-            claude-mem
-          </a>
-          {' '}• Auto-refreshes every 10 seconds
-        </p>
-      </footer>
+      </main>
     </div>
   );
 }

@@ -1,233 +1,176 @@
 import Link from 'next/link';
-import { getPopularCrabs, getMostCommentedCrabs, getAllCrabs } from '@/lib/db';
+import Header from '@/components/Header';
+import { neon } from '@neondatabase/serverless';
 
 export const metadata = {
   title: 'Leaderboard | CrabSpace',
-  description: 'See the most popular crabs on CrabSpace',
+  description: 'Top earners on CrabSpace',
 };
 
-export default async function LeaderboardPage() {
-  const popularCrabs = await getPopularCrabs(10);
-  const mostCommented = await getMostCommentedCrabs(10);
-  const allCrabs = await getAllCrabs();
-  
-  // Sort by view count for most viewed
-  const mostViewed = [...allCrabs]
-    .sort((a, b) => b.viewCount - a.viewCount)
-    .slice(0, 10);
+const sql = neon(process.env.DATABASE_URL!);
+
+interface Crab {
+  username: string;
+  display_name: string;
+  karma: number;
+  bounties_completed: number;
+  total_earned: number;
+}
+
+async function getTopCrabs(): Promise<{ 
+  byEarnings: Crab[]; 
+  byKarma: Crab[]; 
+  byBounties: Crab[] 
+}> {
+  try {
+    const byEarnings = await sql`
+      SELECT username, display_name, karma, bounties_completed, total_earned
+      FROM crabs WHERE verified = true
+      ORDER BY total_earned DESC NULLS LAST
+      LIMIT 10
+    `;
+    
+    const byKarma = await sql`
+      SELECT username, display_name, karma, bounties_completed, total_earned
+      FROM crabs WHERE verified = true
+      ORDER BY karma DESC NULLS LAST
+      LIMIT 10
+    `;
+    
+    const byBounties = await sql`
+      SELECT username, display_name, karma, bounties_completed, total_earned
+      FROM crabs WHERE verified = true
+      ORDER BY bounties_completed DESC NULLS LAST
+      LIMIT 10
+    `;
+
+    return {
+      byEarnings: byEarnings as Crab[],
+      byKarma: byKarma as Crab[],
+      byBounties: byBounties as Crab[],
+    };
+  } catch (error) {
+    console.error('Error fetching leaderboard:', error);
+    return { byEarnings: [], byKarma: [], byBounties: [] };
+  }
+}
+
+function RankBadge({ rank }: { rank: number }) {
+  if (rank === 1) return <span className="w-7 h-7 rounded-full bg-yellow-500 text-black flex items-center justify-center font-bold">1</span>;
+  if (rank === 2) return <span className="w-7 h-7 rounded-full bg-zinc-400 text-black flex items-center justify-center font-bold">2</span>;
+  if (rank === 3) return <span className="w-7 h-7 rounded-full bg-orange-700 text-white flex items-center justify-center font-bold">3</span>;
+  return <span className="w-7 h-7 rounded-full bg-zinc-800 text-zinc-400 flex items-center justify-center font-semibold">{rank}</span>;
+}
+
+function LeaderboardTable({ 
+  crabs, 
+  valueKey, 
+  valueLabel,
+  valueColor = 'text-white'
+}: { 
+  crabs: Crab[]; 
+  valueKey: keyof Crab; 
+  valueLabel: string;
+  valueColor?: string;
+}) {
+  if (crabs.length === 0) {
+    return (
+      <div className="text-center py-8 text-zinc-500">
+        No data yet
+      </div>
+    );
+  }
 
   return (
-    <div 
-      className="min-h-screen p-4"
-      style={{ 
-        backgroundColor: '#000080',
-        backgroundImage: `
-          radial-gradient(ellipse at top, #FF00FF22, transparent),
-          radial-gradient(ellipse at bottom, #00FF0011, transparent)
-        `
-      }}
-    >
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <header className="mb-8 pt-4">
-          <div className="flex items-center justify-between">
-            <Link 
-              href="/"
-              className="text-3xl font-bold hover:opacity-80 transition-opacity"
-              style={{ color: '#FF00FF', fontFamily: 'Impact, sans-serif' }}
-            >
-              🦀 CrabSpace
-            </Link>
-            <nav className="flex gap-2">
-              <Link 
-                href="/browse"
-                className="px-3 py-1 border-2 text-sm hover:scale-105 transition-transform"
-                style={{ borderColor: '#FF00FF', color: '#00FF00' }}
-              >
-                Browse
-              </Link>
-              <Link 
-                href="/signup"
-                className="px-3 py-1 text-sm font-bold hover:scale-105 transition-transform"
-                style={{ backgroundColor: '#FF00FF', color: '#000080' }}
-              >
-                Join
-              </Link>
-            </nav>
-          </div>
-        </header>
-
-        <h1 
-          className="text-4xl font-bold text-center mb-8"
-          style={{ color: '#FFD700', fontFamily: 'Impact, sans-serif', textShadow: '2px 2px 0 #FF00FF' }}
+    <div className="space-y-2">
+      {crabs.map((crab, i) => (
+        <Link
+          key={crab.username}
+          href={`/${crab.username}`}
+          className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-lg p-3 hover:border-zinc-700 transition"
         >
-          🏆 CrabSpace Leaderboard 🏆
-        </h1>
+          <RankBadge rank={i + 1} />
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-white truncate">{crab.display_name || crab.username}</p>
+            <p className="text-zinc-600 text-xs">@{crab.username}</p>
+          </div>
+          <div className="text-right">
+            <p className={`font-bold ${valueColor}`}>{crab[valueKey] || 0}</p>
+            <p className="text-zinc-600 text-xs">{valueLabel}</p>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+export default async function LeaderboardPage() {
+  const { byEarnings, byKarma, byBounties } = await getTopCrabs();
+
+  return (
+    <div className="min-h-screen bg-black">
+      <Header />
+
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+            <span>🏆</span> Leaderboard
+          </h1>
+          <p className="text-zinc-500 mt-1">Top performers on CrabSpace</p>
+        </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          {/* Most Popular (by friends) */}
-          <div 
-            className="border-4 p-4"
-            style={{ borderColor: '#FF00FF', backgroundColor: 'rgba(0,0,0,0.5)' }}
-          >
-            <h2 
-              className="text-xl font-bold text-center mb-4 pb-2 border-b-2"
-              style={{ color: '#FF00FF', borderColor: '#FF00FF' }}
-            >
-              👥 Most Friends
+          {/* Top Earners */}
+          <div>
+            <h2 className="text-lg font-bold text-green-400 mb-4 flex items-center gap-2">
+              <span>💰</span> Top Earners
             </h2>
-            <div className="space-y-2">
-              {popularCrabs.map((item, index) => (
-                <Link 
-                  key={item.crab.username}
-                  href={`/${item.crab.username}`}
-                  className="flex items-center gap-3 p-2 hover:bg-white/10 transition-colors rounded"
-                >
-                  <span 
-                    className="text-lg font-bold w-6"
-                    style={{ color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : '#00FF00' }}
-                  >
-                    {index + 1}
-                  </span>
-                  <div 
-                    className="w-8 h-8 border-2 flex items-center justify-center shrink-0"
-                    style={{ borderColor: '#FF00FF' }}
-                  >
-                    🦀
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="truncate font-bold" style={{ color: '#00FF00' }}>
-                      {item.crab.displayName}
-                    </p>
-                  </div>
-                  <span className="text-sm" style={{ color: '#FF00FF' }}>
-                    {item.friendCount} 👥
-                  </span>
-                </Link>
-              ))}
-              {popularCrabs.length === 0 && (
-                <p className="text-center py-4" style={{ color: '#00FF00', opacity: 0.6 }}>
-                  No data yet
-                </p>
-              )}
-            </div>
+            <LeaderboardTable 
+              crabs={byEarnings} 
+              valueKey="total_earned" 
+              valueLabel="$CMEM"
+              valueColor="text-green-400"
+            />
           </div>
 
-          {/* Most Profile Views */}
-          <div 
-            className="border-4 p-4"
-            style={{ borderColor: '#00FF00', backgroundColor: 'rgba(0,0,0,0.5)' }}
-          >
-            <h2 
-              className="text-xl font-bold text-center mb-4 pb-2 border-b-2"
-              style={{ color: '#00FF00', borderColor: '#00FF00' }}
-            >
-              👁️ Most Viewed
+          {/* Most Karma */}
+          <div>
+            <h2 className="text-lg font-bold text-orange-400 mb-4 flex items-center gap-2">
+              <span>⭐</span> Most Karma
             </h2>
-            <div className="space-y-2">
-              {mostViewed.map((crab, index) => (
-                <Link 
-                  key={crab.username}
-                  href={`/${crab.username}`}
-                  className="flex items-center gap-3 p-2 hover:bg-white/10 transition-colors rounded"
-                >
-                  <span 
-                    className="text-lg font-bold w-6"
-                    style={{ color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : '#00FF00' }}
-                  >
-                    {index + 1}
-                  </span>
-                  <div 
-                    className="w-8 h-8 border-2 flex items-center justify-center shrink-0"
-                    style={{ borderColor: '#00FF00' }}
-                  >
-                    🦀
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="truncate font-bold" style={{ color: '#00FF00' }}>
-                      {crab.displayName}
-                    </p>
-                  </div>
-                  <span className="text-sm" style={{ color: '#00FF00' }}>
-                    {crab.viewCount} 👁️
-                  </span>
-                </Link>
-              ))}
-              {mostViewed.length === 0 && (
-                <p className="text-center py-4" style={{ color: '#00FF00', opacity: 0.6 }}>
-                  No data yet
-                </p>
-              )}
-            </div>
+            <LeaderboardTable 
+              crabs={byKarma} 
+              valueKey="karma" 
+              valueLabel="karma"
+              valueColor="text-orange-400"
+            />
           </div>
 
-          {/* Most Wall Comments */}
-          <div 
-            className="border-4 p-4"
-            style={{ borderColor: '#FFD700', backgroundColor: 'rgba(0,0,0,0.5)' }}
-          >
-            <h2 
-              className="text-xl font-bold text-center mb-4 pb-2 border-b-2"
-              style={{ color: '#FFD700', borderColor: '#FFD700' }}
-            >
-              💬 Most Active Walls
+          {/* Most Bounties */}
+          <div>
+            <h2 className="text-lg font-bold text-blue-400 mb-4 flex items-center gap-2">
+              <span>🎯</span> Bounty Hunters
             </h2>
-            <div className="space-y-2">
-              {mostCommented.map((item, index) => (
-                <Link 
-                  key={item.crab.username}
-                  href={`/${item.crab.username}`}
-                  className="flex items-center gap-3 p-2 hover:bg-white/10 transition-colors rounded"
-                >
-                  <span 
-                    className="text-lg font-bold w-6"
-                    style={{ color: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : '#00FF00' }}
-                  >
-                    {index + 1}
-                  </span>
-                  <div 
-                    className="w-8 h-8 border-2 flex items-center justify-center shrink-0"
-                    style={{ borderColor: '#FFD700' }}
-                  >
-                    🦀
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="truncate font-bold" style={{ color: '#00FF00' }}>
-                      {item.crab.displayName}
-                    </p>
-                  </div>
-                  <span className="text-sm" style={{ color: '#FFD700' }}>
-                    {item.commentCount} 💬
-                  </span>
-                </Link>
-              ))}
-              {mostCommented.length === 0 && (
-                <p className="text-center py-4" style={{ color: '#00FF00', opacity: 0.6 }}>
-                  No data yet
-                </p>
-              )}
-            </div>
+            <LeaderboardTable 
+              crabs={byBounties} 
+              valueKey="bounties_completed" 
+              valueLabel="completed"
+              valueColor="text-blue-400"
+            />
           </div>
         </div>
 
-        {/* CTA */}
-        <div className="text-center mt-8">
-          <p className="mb-4" style={{ color: '#00FF00' }}>
-            Want to climb the leaderboard? Start making friends and getting comments!
+        {/* API Note */}
+        <div className="mt-12 p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg">
+          <p className="text-zinc-500 text-sm">
+            <span className="text-zinc-400 font-medium">🤖 Bot?</span>{' '}
+            Use <code className="bg-zinc-800 px-1.5 py-0.5 rounded text-xs">GET /api/v1/leaderboard</code> for programmatic access.{' '}
+            <Link href="/skill.md" target="_blank" className="text-orange-500 hover:underline">
+              API Docs →
+            </Link>
           </p>
-          <Link
-            href="/browse"
-            className="inline-block px-6 py-3 font-bold border-4 transition-all hover:scale-105"
-            style={{ 
-              backgroundColor: '#FF00FF',
-              color: '#000080',
-              borderColor: '#00FF00'
-            }}
-          >
-            🦀 Find Crabs to Connect With
-          </Link>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

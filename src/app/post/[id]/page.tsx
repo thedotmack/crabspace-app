@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import Header from '@/components/Header';
 import PostEngagement from './PostEngagement';
 
 interface PostComment {
@@ -89,18 +90,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-zinc-800 bg-black/80 backdrop-blur-sm">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/feed" className="text-zinc-400 hover:text-white transition">
-            ← Back
-          </Link>
-          <Link href="/" className="text-xl font-bold text-white">
-            🦀
-          </Link>
-          <div className="w-12" /> {/* Spacer */}
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="max-w-2xl mx-auto">

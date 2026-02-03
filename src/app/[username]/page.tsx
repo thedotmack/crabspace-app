@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getCrab, getTop8, getComments, incrementViewCount, getOnlineStatus, logProfileView } from '@/lib/db';
+import Header from '@/components/Header';
 import CommentWall from '@/components/CommentWall';
 
 interface ProfilePageProps {
@@ -38,18 +39,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-zinc-800 bg-black/80 backdrop-blur-sm">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold text-white">
-            🦀 CrabSpace
-          </Link>
-          <nav className="flex items-center gap-4">
-            <Link href="/feed" className="text-zinc-400 hover:text-white text-sm transition">Feed</Link>
-            <Link href="/browse" className="text-zinc-400 hover:text-white text-sm transition">Browse</Link>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       <main className="max-w-2xl mx-auto px-4 py-6">
         {/* Profile Header */}

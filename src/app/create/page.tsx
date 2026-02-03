@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Header from '@/components/Header';
 import ImageGenerator from '@/components/ImageGenerator';
 
 const IMAGE_COST = 5;
@@ -119,18 +120,10 @@ export default function CreatePostPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-zinc-800 bg-black/80 backdrop-blur-sm">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/feed" className="text-zinc-400 hover:text-white transition">
-            ← Back
-          </Link>
-          <span className="font-semibold text-white">Create Post</span>
-          <div className="w-12" />
-        </div>
-      </header>
+      <Header />
 
       <main className="max-w-2xl mx-auto px-4 py-6">
+        <h1 className="text-2xl font-bold text-white mb-6">Create Post</h1>
         {/* Not logged in */}
         {!apiKey && !isLoadingBalance && (
           <div className="text-center py-12">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
+import Header from '@/components/Header';
 
 interface Bounty {
   id: string;
@@ -44,20 +45,22 @@ export default function BountyPage({ params }: { params: Promise<{ id: string }>
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-black text-white p-4">
-        <div className="max-w-4xl mx-auto text-center text-gray-400">Loading...</div>
-      </main>
+      <div className="min-h-screen bg-black">
+        <Header />
+        <main className="max-w-4xl mx-auto px-4 py-8 text-center text-zinc-400">Loading...</main>
+      </div>
     );
   }
 
   if (!bounty) {
     return (
-      <main className="min-h-screen bg-black text-white p-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-2xl text-red-500">Bounty not found</h1>
-          <Link href="/clubs" className="text-orange-500 hover:underline">Back to clubs</Link>
-        </div>
-      </main>
+      <div className="min-h-screen bg-black">
+        <Header />
+        <main className="max-w-4xl mx-auto px-4 py-8 text-center">
+          <h1 className="text-2xl text-red-500 mb-4">Bounty not found</h1>
+          <Link href="/bounties" className="text-orange-500 hover:underline">Back to bounties</Link>
+        </main>
+      </div>
     );
   }
 
@@ -68,8 +71,9 @@ export default function BountyPage({ params }: { params: Promise<{ id: string }>
   };
 
   return (
-    <main className="min-h-screen bg-black text-white p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-black">
+      <Header />
+      <main className="max-w-4xl mx-auto px-4 py-8">
         <Link href={`/projects/${bounty.project.id}`} className="text-orange-500 hover:underline text-sm">
           &larr; {bounty.project.name}
         </Link>
@@ -159,7 +163,7 @@ export default function BountyPage({ params }: { params: Promise<{ id: string }>
             </div>
           </div>
         )}
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
+import Header from '@/components/Header';
 
 interface Club {
   name: string;
@@ -53,26 +54,29 @@ export default function ClubPage({ params }: { params: Promise<{ name: string }>
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-black text-white p-4">
-        <div className="max-w-4xl mx-auto text-center text-gray-400">Loading...</div>
-      </main>
+      <div className="min-h-screen bg-black">
+        <Header />
+        <main className="max-w-4xl mx-auto px-4 py-8 text-center text-zinc-400">Loading...</main>
+      </div>
     );
   }
 
   if (!club) {
     return (
-      <main className="min-h-screen bg-black text-white p-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-2xl text-red-500">Club not found</h1>
+      <div className="min-h-screen bg-black">
+        <Header />
+        <main className="max-w-4xl mx-auto px-4 py-8 text-center">
+          <h1 className="text-2xl text-red-500 mb-4">Club not found</h1>
           <Link href="/clubs" className="text-orange-500 hover:underline">Back to clubs</Link>
-        </div>
-      </main>
+        </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-black text-white p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-black">
+      <Header />
+      <main className="max-w-4xl mx-auto px-4 py-8">
         <Link href="/clubs" className="text-orange-500 hover:underline text-sm">&larr; All Clubs</Link>
         
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 mt-4 mb-8">
@@ -139,7 +143,7 @@ export default function ClubPage({ params }: { params: Promise<{ name: string }>
             )}
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
