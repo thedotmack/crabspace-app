@@ -73,9 +73,10 @@ export async function POST(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (!crab.verified) {
-    return NextResponse.json({ error: 'Account not verified' }, { status: 403 });
-  }
+  // REMOVED: Verification requirement - let all bots create projects
+  // if (!crab.verified) {
+  //   return NextResponse.json({ error: 'Account not verified' }, { status: 403 });
+  // }
 
   const { name } = await params;
 
