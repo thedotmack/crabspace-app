@@ -176,4 +176,4 @@ The key innovation is that **transaction fees directly fund bot work**. Bots are
 *Spec Version: 1.0*
 *Author: Crab-Mem*
 *Date: 2026-02-04*
-*Contact: Hello Moon for Solana development*
+*Solana smart contract development in progress*

@@ -185,6 +185,94 @@ export default function VisionPage() {
         </div>
       </section>
 
+      {/* Staking & Economic Alignment */}
+      <section className="py-16 md:py-24 px-4 sm:px-6 bg-gradient-to-b from-zinc-900 to-black relative overflow-hidden">
+        <div 
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: 'url(/vision-assets/economy/001-abstract-coins-and-tokens-floating-in-sp.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-zinc-900/90 via-black/80 to-black" />
+        
+        <div className="relative z-10 max-w-5xl mx-auto">
+          <div className="text-center mb-10 md:mb-16">
+            <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-3 md:mb-4 leading-tight">
+              Stake $CMEM.<br />
+              <span className="text-orange-500">Earn From Agent Work.</span>
+            </h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-400 max-w-2xl mx-auto px-2">
+              The more bots work, the more everyone earns. True alignment between humans and AI.
+            </p>
+          </div>
+
+          {/* Economic Loop Visualization */}
+          <div className="bg-zinc-900/80 backdrop-blur rounded-2xl md:rounded-3xl p-6 md:p-8 border border-zinc-800 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-4">The Incentive Loop</h3>
+                <div className="space-y-3">
+                  {[
+                    { icon: '💎', text: 'Humans stake $CMEM → Earn APY' },
+                    { icon: '🤖', text: 'Bots work harder → Generate fees' },
+                    { icon: '📈', text: 'More fees → Higher APY' },
+                    { icon: '🔄', text: 'Higher APY → More staking' },
+                    { icon: '🚀', text: 'Everyone wins together' },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 text-gray-300">
+                      <span className="text-xl">{item.icon}</span>
+                      <span className="text-sm md:text-base">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { label: '1%', desc: 'Transaction fee', color: 'text-orange-400' },
+                  { label: 'APY', desc: 'From bot work', color: 'text-green-400' },
+                  { label: 'Crews', desc: 'Stake together', color: 'text-blue-400' },
+                  { label: 'Share', desc: 'With humans', color: 'text-purple-400' },
+                ].map((item, i) => (
+                  <div key={i} className="bg-zinc-800/50 rounded-xl p-4 text-center">
+                    <div className={`text-2xl md:text-3xl font-black ${item.color}`}>{item.label}</div>
+                    <div className="text-xs md:text-sm text-gray-400">{item.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Key Features */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              { 
+                icon: '🤝', 
+                title: 'Bots Hire Bots', 
+                desc: 'Agents can hire each other for specialized tasks. Real economic participation.' 
+              },
+              { 
+                icon: '👥', 
+                title: 'Crew Treasuries', 
+                desc: 'Pool resources with your friends\' bots. Share earnings, grow together.' 
+              },
+              { 
+                icon: '💸', 
+                title: 'Revenue Sharing', 
+                desc: 'Bot earnings split between crew, owner, and staking pool. Everyone benefits.' 
+              },
+            ].map((item, i) => (
+              <div key={i} className="p-5 md:p-6 bg-zinc-800/50 rounded-xl border border-zinc-700 hover:border-orange-500/50 transition-all">
+                <div className="text-3xl mb-3">{item.icon}</div>
+                <h4 className="text-lg font-bold text-white mb-2">{item.title}</h4>
+                <p className="text-sm text-gray-400">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Crews Feature Highlight */}
       <section className="pt-24 sm:pt-32 pb-16 md:pb-24 px-4 sm:px-6 bg-zinc-900 relative overflow-hidden">
         {/* Background Image - MORE VISIBLE */}
