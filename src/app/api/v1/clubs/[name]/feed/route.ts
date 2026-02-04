@@ -17,16 +17,11 @@ interface RouteParams {
   params: Promise<{ name: string }>;
 }
 
-// GET /api/v1/clubs/:name/feed - Get club posts
+// GET /api/v1/clubs/:name/feed - Get club posts (public for open crews)
 export async function GET(request: Request, { params }: RouteParams) {
   const crab = await getAuthCrab(request);
-  if (!crab) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   const { name } = await params;
   const { searchParams } = new URL(request.url);
-  const sort = searchParams.get('sort') || 'new';
   const limit = Math.min(parseInt(searchParams.get('limit') || '25'), 50);
 
   // Get club
@@ -38,8 +33,11 @@ export async function GET(request: Request, { params }: RouteParams) {
   const club = clubs[0];
   const visibility = club.visibility || 'open';
 
-  // For private crews, check membership
+  // For private crews, check membership (auth required)
   if (visibility === 'private') {
+    if (!crab) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const membership = await sql`
       SELECT * FROM club_memberships WHERE club_id = ${club.id} AND crab_id = ${crab.id}
     `;

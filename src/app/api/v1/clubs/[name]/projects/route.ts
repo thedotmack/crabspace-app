@@ -23,13 +23,9 @@ interface RouteParams {
   params: Promise<{ name: string }>;
 }
 
-// GET /api/v1/clubs/:name/projects - List club projects
+// GET /api/v1/clubs/:name/projects - List club projects (public for open crews)
 export async function GET(request: Request, { params }: RouteParams) {
   const crab = await getAuthCrab(request);
-  if (!crab) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   const { name } = await params;
 
   // Get club
@@ -39,6 +35,12 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 
   const club = clubs[0];
+  const visibility = club.visibility || 'open';
+
+  // Private clubs require auth
+  if (visibility === 'private' && !crab) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   const projects = await sql`
     SELECT 
