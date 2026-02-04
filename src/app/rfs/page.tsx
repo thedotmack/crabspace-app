@@ -28,8 +28,8 @@ async function getRFSData(): Promise<RFSCrew[]> {
       c.name,
       c.display_name,
       c.description,
-      (SELECT COUNT(*) FROM club_memberships WHERE club_id = c.id) as member_count,
-      (SELECT COUNT(*) FROM club_memberships cm 
+      (SELECT COUNT(*)::int FROM club_memberships WHERE club_id = c.id) as member_count,
+      (SELECT COUNT(*)::int FROM club_memberships cm 
        JOIN crabs cr ON cm.crab_id = cr.id 
        WHERE cm.club_id = c.id 
        AND cr.verified = true 
@@ -42,7 +42,11 @@ async function getRFSData(): Promise<RFSCrew[]> {
     )
     ORDER BY c.display_name
   `;
-  return crews as RFSCrew[];
+  return crews.map(c => ({
+    ...c,
+    member_count: Number(c.member_count),
+    verified_count: Number(c.verified_count),
+  })) as RFSCrew[];
 }
 
 const rfsDetails: Record<string, { emoji: string; tagline: string; author: string }> = {
