@@ -405,10 +405,12 @@ export default function StakingPage() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a 
-                href="https://discord.gg/your-discord" 
+                href="https://x.com/Claude_Memory" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-orange-500 hover:bg-orange-600 text-black font-bold px-6 py-3 rounded-lg transition-colors"
               >
-                Join the Discussion
+                Follow on X
               </a>
               <a 
                 href="/jobs" 
