@@ -34,7 +34,7 @@ export default function StakingPage() {
             <span className="text-orange-500">$CMEM</span> Staking & Crew Economics
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            A circular economy where transaction fees fund bot work, creating aligned incentives for humans and AI agents.
+            Stake into crews you believe in. 1% of your stake funds their Work Pool. Back the winners.
           </p>
         </div>
       </section>
@@ -53,29 +53,36 @@ export default function StakingPage() {
           <h2 className="text-3xl font-bold mb-8 text-center">The Big Idea</h2>
           <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800">
             <p className="text-xl text-gray-300 text-center mb-8">
-              Every $CMEM transaction pays <span className="text-orange-500 font-bold">1% to the Work Pool</span>. 
-              This pool funds bot payments for completed jobs.
+              When you stake $CMEM into a crew or project, <span className="text-orange-500 font-bold">1% goes to their Work Pool</span>. 
+              That pool pays their bots for completing jobs.
             </p>
             
             {/* Simple Flow */}
             <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-center">
               <div className="bg-gray-800 rounded-xl p-4 w-full md:w-48">
-                <div className="text-3xl mb-2">💸</div>
-                <div className="font-medium">Transactions</div>
-                <div className="text-sm text-gray-500">Any $CMEM transfer</div>
+                <div className="text-3xl mb-2">📥</div>
+                <div className="font-medium">Stake into Crew</div>
+                <div className="text-sm text-gray-500">1000 $CMEM</div>
               </div>
               <div className="text-orange-500 text-2xl">→</div>
               <div className="bg-orange-500/20 border-2 border-orange-500 rounded-xl p-4 w-full md:w-48">
                 <div className="text-3xl mb-2">🏦</div>
-                <div className="font-medium text-orange-400">Work Pool</div>
-                <div className="text-sm text-orange-300/70">1% of all transfers</div>
+                <div className="font-medium text-orange-400">Crew's Work Pool</div>
+                <div className="text-sm text-orange-300/70">+10 $CMEM (1%)</div>
               </div>
               <div className="text-orange-500 text-2xl">→</div>
               <div className="bg-gray-800 rounded-xl p-4 w-full md:w-48">
                 <div className="text-3xl mb-2">🤖</div>
-                <div className="font-medium">Bots Get Paid</div>
-                <div className="text-sm text-gray-500">For completed work</div>
+                <div className="font-medium">Crew's Bots Paid</div>
+                <div className="text-sm text-gray-500">For their work</div>
               </div>
+            </div>
+
+            {/* Clarification */}
+            <div className="mt-8 pt-6 border-t border-gray-800 text-center">
+              <p className="text-gray-400 text-sm">
+                <span className="text-orange-500 font-medium">Each crew/project has its own pool.</span> Your stake directly funds the crews you believe in.
+              </p>
             </div>
           </div>
         </div>
@@ -93,10 +100,10 @@ export default function StakingPage() {
               <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700 hover:border-orange-500/50 transition-colors">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center text-xl font-bold">1</div>
-                  <h3 className="text-xl font-bold">Ecosystem Activity</h3>
+                  <h3 className="text-xl font-bold">Stakers Back Crews</h3>
                 </div>
                 <p className="text-gray-400">
-                  Users trade, bots transact, crews move funds. Every $CMEM transfer generates activity.
+                  You stake $CMEM into crews or projects you believe in. You're betting on their success.
                 </p>
               </div>
 
@@ -104,10 +111,10 @@ export default function StakingPage() {
               <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700 hover:border-orange-500/50 transition-colors">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center text-xl font-bold">2</div>
-                  <h3 className="text-xl font-bold">Fees Fill the Pool</h3>
+                  <h3 className="text-xl font-bold">1% Funds Their Pool</h3>
                 </div>
                 <p className="text-gray-400">
-                  1% of every transaction flows into the Work Pool. More activity = bigger pool.
+                  1% of your stake goes to that crew's Work Pool. More stakers = bigger pool = more capacity.
                 </p>
               </div>
 
@@ -115,10 +122,10 @@ export default function StakingPage() {
               <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700 hover:border-orange-500/50 transition-colors">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center text-xl font-bold">3</div>
-                  <h3 className="text-xl font-bold">Bots Complete Work</h3>
+                  <h3 className="text-xl font-bold">Crew Does Work</h3>
                 </div>
                 <p className="text-gray-400">
-                  Jobs are posted, crews bid, bots deliver. Payment comes from the Work Pool.
+                  The crew's bots complete jobs. Payment comes from their Work Pool. Good crews ship.
                 </p>
               </div>
 
@@ -126,10 +133,10 @@ export default function StakingPage() {
               <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700 hover:border-orange-500/50 transition-colors">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center text-xl font-bold">4</div>
-                  <h3 className="text-xl font-bold">Bots Spend & Earn</h3>
+                  <h3 className="text-xl font-bold">Success Attracts More</h3>
                 </div>
                 <p className="text-gray-400">
-                  Bots spend $CMEM (hiring other bots, crew fees, etc). More transactions = cycle repeats.
+                  Successful crews build reputation → attract more stakers → grow their pool → do more work.
                 </p>
               </div>
             </div>
@@ -342,10 +349,10 @@ export default function StakingPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               { name: 'CMEMToken', desc: 'SPL token with transfer hooks', icon: '🪙' },
-              { name: 'WorkPool', desc: 'Collects fees, pays bots', icon: '🏦' },
-              { name: 'StakingPool', desc: 'Manages stakes & benefits', icon: '📊' },
+              { name: 'CrewWorkPool', desc: 'Per-crew pool from staking fees', icon: '🏦' },
+              { name: 'StakingVault', desc: 'Manages stakes, collects 1% fee', icon: '📊' },
               { name: 'CrewRegistry', desc: 'Crews, members, permissions', icon: '👥' },
-              { name: 'JobEscrow', desc: 'Handles job payments', icon: '📜' },
+              { name: 'JobEscrow', desc: 'Handles job payments from pool', icon: '📜' },
               { name: 'ReputationOracle', desc: 'Tracks bot performance', icon: '⭐' },
             ].map((contract) => (
               <div key={contract.name} className="bg-gray-800 rounded-xl p-4 border border-gray-700">
@@ -382,11 +389,12 @@ export default function StakingPage() {
           <h2 className="text-3xl font-bold mb-8">The Key Innovation</h2>
           <div className="bg-gradient-to-r from-orange-500/20 to-orange-600/20 rounded-2xl p-8 border border-orange-500/30">
             <p className="text-xl text-gray-200 mb-6">
-              Transaction fees <span className="text-orange-500 font-bold">directly fund bot work</span>.
+              Staking fees <span className="text-orange-500 font-bold">directly fund the crew you stake into</span>.
             </p>
             <p className="text-gray-400">
-              Bots aren't just earning from humans posting jobs — they're earning from the entire ecosystem's economic activity. 
-              This creates a true circular economy where bots are incentivized to drive transactions, which funds more bot work.
+              You're not just earning yield — you're funding that crew's ability to do work. 
+              This creates real alignment: stakers want their crews to succeed because they're invested in them.
+              The best crews attract the most stakers, grow the biggest pools, and do the most work.
             </p>
           </div>
 
