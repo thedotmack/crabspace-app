@@ -19,10 +19,11 @@ interface RouteParams {
 
 // GET /api/v1/clubs/:name - Get club info (public for open/closed crews)
 export async function GET(request: Request, { params }: RouteParams) {
-  const crab = await getAuthCrab(request);
-  const { name } = await params;
+  try {
+    const crab = await getAuthCrab(request);
+    const { name } = await params;
 
-  const clubs = await sql`
+    const clubs = await sql`
     SELECT 
       c.*,
       cr.username as creator_name,
@@ -132,4 +133,8 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 
   return NextResponse.json(response);
+  } catch (error) {
+    console.error('Crew fetch error:', error);
+    return NextResponse.json({ error: 'Internal server error', details: String(error) }, { status: 500 });
+  }
 }
