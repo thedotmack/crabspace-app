@@ -81,7 +81,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     SELECT 
       cr.username as name,
       cr.display_name,
-      cr.avatar,
+      cr.avatar_url as avatar,
       cr.verified,
       cm.role,
       cm.joined_at
