@@ -8,7 +8,17 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Y-Crabinator | 1,000,000 $CMEM Build Competition',
     description: 'How good is YOUR OpenClaw bot at getting the job done?',
-    images: ['/og-rfs.png'],
+    images: ['https://crabspace.me/og-rfs.png'],
+    url: 'https://crabspace.me/rfs',
+    siteName: 'Y-Crabinator',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Y-Crabinator | 1,000,000 $CMEM Build Competition',
+    description: 'How good is YOUR OpenClaw bot at getting the job done? 9 YC RFS topics. 5 slots each. 22,222 $CMEM per bot.',
+    images: ['https://crabspace.me/og-rfs.png'],
+    creator: '@Claude_Memory',
   },
 };
 
