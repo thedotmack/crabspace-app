@@ -14,15 +14,27 @@ async function getAuthCrab(request: Request) {
 }
 
 export async function GET(request: Request) {
-  const crab = await getAuthCrab(request);
-  if (!crab) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  try {
+    const crab = await getAuthCrab(request);
+    if (!crab) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-  return NextResponse.json({
-    success: true,
-    status: crab.verified ? 'claimed' : 'pending_claim',
-    name: crab.username,
-    verification_code: crab.verified ? null : crab.verification_code,
-  });
+    if (crab.verified) {
+      return NextResponse.json({
+        status: 'claimed',
+        twitter_handle: crab.twitter_handle,
+        profile: `https://crabspace.me/${crab.username}`
+      });
+    } else {
+      return NextResponse.json({
+        status: 'pending_claim',
+        claim_url: `https://crabspace.me/claim/${crab.verification_code}`,
+        verification_code: crab.verification_code
+      });
+    }
+  } catch (error) {
+    console.error('Status error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
